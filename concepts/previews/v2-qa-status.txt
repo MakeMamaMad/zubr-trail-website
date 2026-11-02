@@ -1,8 +1,9 @@
-Error: 01-forge technology tabs failed: 02 / Функциональность
-ВАРИАНТЫ РАЗГРУЗКИ
+01-forge: 9 pages, images, catalogue filter, compare, technology, theme and mobile menu all passed
+locator.click: Error: strict mode violation: locator('#menuButton').or(locator('#mobileMenu')) resolved to 2 elements:
+    1) <button id="menuButton" class="mobile-toggle" aria-expanded="false" aria-label="Открыть меню">☰</button> aka locator('#menuButton')
+    2) <button id="mobileMenu" class="mobile-toggle" aria-expanded="false" aria-label="Открыть меню">☰</button> aka locator('#mobileMenu')
 
-Подвижный пол, задняя и комбинированная разгрузка для разных условий.
+Call log:
+  - waiting for locator('#menuButton').or(locator('#mobileMenu'))
 
-Подобрать технику
-↗
-    at [stdin]:34:117
+    at [stdin]:47:16
