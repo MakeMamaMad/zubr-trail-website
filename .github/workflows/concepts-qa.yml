@@ -1,10 +1,12 @@
-name: ZUBR TRAIL Four Independent Site QA
+name: ZUBR GOLD immersive website end-to-end QA
 on:
   push:
     branches: [main]
     paths:
-      - "concepts/**"
+      - "concepts/01-forge/**"
+      - "concepts/shared/v2-data.js"
       - ".github/workflows/concepts-qa.yml"
+      - "!concepts/previews/**"
   workflow_dispatch:
 permissions:
   contents: write
@@ -18,126 +20,144 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Verify four independent website packages
-        run: |
-          set -e
-          node --check concepts/shared/v2-data.js
-          node --check concepts/shared/v2-core.js
-          python - <<'PY'
-          from pathlib import Path
-          variants=['01-forge','02-atelier','03-terrain','04-vector']
-          pages=['index.html','catalog.html','model.html','technology.html','production.html','test-drive.html','news.html','article.html','contacts.html']
-          for v in variants:
-              assert (Path('concepts')/v/'v2-view.js').exists()
-              assert (Path('concepts')/v/'v2-style.css').exists()
-              for p in pages:
-                  src=(Path('concepts')/v/p).read_text(encoding='utf-8')
-                  for s in ['v2-core.js','v2-view.js','v2-style.css','v2-data.js']:
-                      assert s in src,(v,p,s)
-          print('4 independent websites / 36 HTML pages verified')
-          PY
-          for f in concepts/*/v2-view.js; do node --check "$f"; done
-      - name: Install Chromium browser
-        run: |
-          npm install --no-save playwright@1.55.1
-          npx playwright install --with-deps chromium
-      - name: Verify layouts and interactions; capture previews
+      - name: Validate JS syntax and all nine pages
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 8123 --bind 127.0.0.1 >/tmp/zubr-site.log 2>&1 &
-          node <<'NODE' > /tmp/zubr-qa.log 2>&1
-          const {chromium}=require('playwright');
-          const fs=require('fs');
-          (async()=>{
-            const browser=await chromium.launch({headless:true});
-            const cases=[
-              ['01-forge','g-hero'],
-              ['02-atelier','a-home'],
-              ['03-terrain','t-mainhero'],
-              ['04-vector','l-hero']
-            ];
-            const pages=['index.html','catalog.html','model.html?id=SAT-510','technology.html','production.html','test-drive.html','news.html','article.html?slug=aluminum','contacts.html'];
+          for f in concepts/01-forge/gold-core.js concepts/01-forge/gold-pages.js concepts/01-forge/gold-motion.js concepts/shared/v2-data.js; do node --check "$f"; done
+          python3 - <<'PY'
+          from pathlib import Path
+          root=Path('concepts/01-forge')
+          pages=['index.html','catalog.html','model.html','technology.html','production.html','test-drive.html','news.html','article.html','contacts.html']
+          for page in pages:
+              f=root/page
+              assert f.is_file(), f
+              text=f.read_text()
+              for required in ['gold-shell.css','gold-home.css','gold-interior.css','gold-core.js','gold-pages.js','gold-motion.js']:
+                  assert required in text,(page,required)
+          assets=Path('assets/colorways/gold')
+          for name in ['hero','road','factory','aluminum','sat-150','sat-197','sat-500','sat-510','sat-545','sat-550']:
+              img=assets/(name+'.webp')
+              assert img.is_file() and img.stat().st_size>4000, img
+          print('GOLD: 9 independent HTML routes, four JS modules, 10 images verified')
+          PY
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.1
+          npx playwright install --with-deps chromium
+      - name: Browser QA desktop, mobile and interactions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8123 --bind 127.0.0.1 > /tmp/zubr-server.log 2>&1 &
+          node > /tmp/gold-qa.log 2>&1 <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          (async () => {
+            const browser = await chromium.launch({headless:true});
+            const root = 'http://127.0.0.1:8123/concepts/01-forge/';
+            const pages = ['index.html','catalog.html','model.html?id=SAT-510',
+              'technology.html','production.html','test-drive.html','news.html',
+              'article.html?slug=aluminum','contacts.html'];
+            const images = [];
             fs.mkdirSync('concepts/previews',{recursive:true});
-            for(const [folder,hero] of cases){
-              const page=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
-              const errors=[];
-              page.on('pageerror',e=>errors.push(e.message));
-              for(const route of pages){
-                let res=await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/'+route,{waitUntil:'networkidle'});
-                if(res.status()>=400)throw Error(folder+'/'+route+' HTTP '+res.status());
-                if(await page.locator('#app main').count()!==1)throw Error(folder+'/'+route+' missing main');
-                if(await page.locator('h1').count()===0)throw Error(folder+'/'+route+' missing heading');
-                let broken=await page.evaluate(()=>[...document.querySelectorAll('img')].filter(i=>i.complete&&i.naturalWidth===0).map(i=>i.src));
-                if(broken.length)throw Error(folder+'/'+route+' broken images: '+broken.join(' '));
-                if(errors.length)throw Error(folder+'/'+route+' JS errors: '+errors.join('; '));
-              }
-              for(const id of ['SAT-150','SAT-197','SAT-500','SAT-510','SAT-545','SAT-550']){
-                const url='http://127.0.0.1:8123/concepts/'+folder+'/model.html?id='+id;
-                await page.goto(url,{waitUntil:'networkidle'});
-                if(!(await page.locator('h1').first().innerText()).includes(id))throw Error(folder+' wrong model title for '+id);
-                if(await page.locator('a[href="test-drive.html?model='+id+'"]').count()===0)throw Error(folder+' missing model inquiry for '+id);
-              }
-              await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/test-drive.html?model=SAT-510',{waitUntil:'networkidle'});
-              const selected=await page.locator('select[name="model"]').inputValue();
-              if(selected!=='SAT-510')throw Error(folder+' test-drive preselection failed: '+selected);
-              for(const slug of ['aluminum','grain','floor']){
-                await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/article.html?slug='+slug,{waitUntil:'networkidle'});
-                if(await page.locator('h1').count()!==1)throw Error(folder+' article route failed: '+slug);
-              }
-              await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/catalog.html',{waitUntil:'networkidle'});
-              if(await page.locator('[data-group]').count()!==6)throw Error(folder+' six models missing');
-              await page.locator('[data-filter=grain]').click();
-              if(await page.locator('[data-group]:visible').count()!==2)throw Error(folder+' grain filter incorrect');
-              await page.locator('#compareButton').click();
-              if(await page.locator('#compareOutput table').count()!==1)throw Error(folder+' compare failed');
-              await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/technology.html',{waitUntil:'networkidle'});
-              await page.locator('[data-adv="1"]').click();
-              const techText=await page.locator('#techOutput').innerText(); if(!techText.toLowerCase().includes('варианты разгрузки'))throw Error(folder+' technology tabs failed: '+techText.slice(0,280));
-              await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/index.html',{waitUntil:'networkidle'});
-              if(await page.locator('.'+hero).count()!==1)throw Error(folder+' distinct homepage missing');
-              if(folder==='01-forge'){
-                if(await page.locator('.g-featured-products .product').count()!==6)throw Error('GOLD featured model grid incomplete');
-                if(await page.locator('.g-cargo-grid a').count()!==4)throw Error('GOLD cargo selector incomplete');
-              }
-              if(folder==='04-vector'){
-                if(await page.locator('[data-lime-model]').count()!==6)throw Error('LIME product configurator incomplete');
-                await page.locator('[data-lime-model="SAT-510"]').click();
-                if((await page.locator('#selectedModelLabel').innerText())!=='SAT-510')throw Error('LIME model selection not updated');
-                if(!(await page.locator('#limeRequestLink').getAttribute('href')).includes('SAT-510'))throw Error('LIME request link not updated');
-                if(!(await page.locator('#limeSpecs').innerText()).includes('49'))throw Error('LIME specs not updated');
-                await page.locator('[data-wizard-step="3"]').click();
-                if(!(await page.locator('#wizardHeadline').innerText()).includes('SAT-510'))throw Error('LIME configuration wizard not updated');
-              }
-              const before=await page.locator('html').getAttribute('data-theme');
-              await page.locator('#themeButton').click();
-              const after=await page.locator('html').getAttribute('data-theme');
-              if(before===after)throw Error(folder+' theme switch failed');
-              await page.locator('#themeButton').click();
-              await page.screenshot({path:'concepts/previews/v2-'+folder+'.png',fullPage:true});
-              await page.setViewportSize({width:390,height:844});
-              await page.reload({waitUntil:'networkidle'});
-              if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+6))throw Error(folder+' mobile overflow');
-              const menu=(await page.locator('#mobileMenu').count())?page.locator('#mobileMenu'):page.locator('#menuButton');
-              await menu.click();
-              if(!(await page.locator('#nav').evaluate(e=>e.classList.contains('open'))))throw Error(folder+' mobile menu failed');
-              await page.screenshot({path:'concepts/previews/v2-'+folder+'-mobile.png',fullPage:false});
-              console.log(folder+': 9 pages, images, catalogue filter, compare, technology, theme and mobile menu all passed');
-              await page.close();
+            const page = await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
+            const jsErrors = [];
+            page.on('pageerror', e=>jsErrors.push(e.message));
+            async function openRoute(route){
+              const response = await page.goto(root+route,{waitUntil:'networkidle'});
+              if(!response || response.status()>=400)throw Error('Bad HTTP '+route);
+              if(await page.locator('#app main').count()!==1)throw Error('No main in '+route);
+              if(await page.locator('h1').count()!==1)throw Error('Wrong H1 in '+route);
+              if(jsErrors.length)throw Error('JS '+route+' '+jsErrors.join('; '));
+              const broken=await page.evaluate(()=>[...document.images].filter(img=>img.complete&&img.naturalWidth===0).map(img=>img.src));
+              if(broken.length)throw Error('Broken image '+route+' '+broken.join(','));
             }
+            for(const route of pages)await openRoute(route);
+            console.log('PASS all nine site pages, no runtime errors');
+            await openRoute('index.html');
+            if(await page.locator('.rail-card').count()!==6)throw Error('Home: rail does not contain all six SAT models');
+            if(await page.locator('.story-chapter').count()!==4)throw Error('Home: engineering story missing');
+            if(await page.locator('[data-lab]').count()!==8)throw Error('Home: engineering hotspots missing');
+            await page.locator('.lab-switch[data-lab="1"]').click();
+            if(!(await page.locator('#labTitle').innerText()).includes('Варианты разгрузки'))throw Error('Home: lab hotspot does not update');
+            const rail=page.locator('#modelRail');
+            const before=await rail.evaluate(el=>el.scrollLeft);
+            await page.locator('[data-rail-dir="1"]').click();
+            await page.waitForTimeout(500);
+            const after=await rail.evaluate(el=>el.scrollLeft);
+            if(after<=before)throw Error('Horizontal product rail does not move');
+            await page.locator('#menuTrigger').click();
+            if(!(await page.locator('#siteMenu').isVisible()))throw Error('Overlay menu did not open');
+            await page.keyboard.press('Escape');
+            if(await page.locator('#siteMenu').isVisible())throw Error('Overlay menu Escape does not close');
+            const initialTheme=await page.locator('html').getAttribute('data-theme');
+            await page.locator('#themeButton').click();
+            const switched=await page.locator('html').getAttribute('data-theme');
+            if(initialTheme===switched)throw Error('Theme switch did not work');
+            await page.locator('#themeButton').click();
+            console.log('PASS cinematic rail, engineering hotspot, full-screen menu, theme switch');
+            await page.screenshot({path:'concepts/previews/gold-experience-desktop.png',fullPage:false});
+            await page.screenshot({path:'concepts/previews/gold-experience-full.png',fullPage:true});
+            await openRoute('catalog.html');
+            if(await page.locator('[data-model]').count()!==6)throw Error('Atlas missing six models');
+            await page.locator('[data-model="SAT-510"]').click();
+            if(!(await page.locator('#atlasTitle').innerText()).includes('SAT-510'))throw Error('Atlas selection broken');
+            if(!(await page.locator('#atlasLink').getAttribute('href')).includes('SAT-510'))throw Error('Atlas detail deep-link broken');
+            await page.locator('[data-filter=grain]').click();
+            if(await page.locator('[data-model]:visible').count()!==2)throw Error('Atlas grain filter broken');
+            await page.locator('#compareAction').click();
+            if(await page.locator('#compareResult table').count()!==1)throw Error('Atlas comparison failed');
+            await page.screenshot({path:'concepts/previews/gold-experience-catalog.png',fullPage:false});
+            console.log('PASS atlas, filters, model preview, comparison');
+            for(const id of ['SAT-150','SAT-197','SAT-500','SAT-510','SAT-545','SAT-550']){
+              await openRoute('model.html?id='+id);
+              if((await page.locator('h1').innerText()).trim()!==id)throw Error('Model page wrong title '+id);
+              if(await page.locator('a[href="test-drive.html?model='+id+'"]').count()===0)throw Error('Model CTA missing '+id);
+              if(await page.locator('.spec-line').count()<3)throw Error('Model specs missing '+id);
+            }
+            console.log('PASS six individual model pages');
+            await openRoute('technology.html');
+            await page.locator('[data-tech="2"]').click();
+            if(!(await page.locator('#techCurrentTitle').innerText()).includes('Конструктивная прочность'))throw Error('Technology switch broken');
+            await openRoute('test-drive.html?model=SAT-510');
+            if(await page.locator('select[name=model]').inputValue()!=='SAT-510')throw Error('Prefilled test-drive model broken');
+            await page.locator('input[name=name]').fill('Тест');
+            await page.locator('input[name=phone]').fill('+375291234567');
+            await page.locator('input[name=consent]').check();
+            await page.locator('#goldForm button[type=submit]').click();
+            if(!(await page.locator('#formFeedback').innerText()).includes('Заявка сформирована'))throw Error('Request form state missing');
+            for(const slug of ['grain','aluminum','floor'])await openRoute('article.html?slug='+slug);
+            console.log('PASS technology interactions, test-drive form, all article routes');
+            await page.setViewportSize({width:390,height:844});
+            for(const route of pages){
+              await openRoute(route);
+              const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+              if(overflow>5)throw Error('Mobile horizontal overflow '+route+': '+overflow+'px');
+            }
+            await openRoute('index.html');
+            await page.screenshot({path:'concepts/previews/gold-experience-mobile.png',fullPage:false});
+            await page.locator('#menuTrigger').click();
+            if(!(await page.locator('#siteMenu').isVisible()))throw Error('Mobile menu broken');
+            await page.locator('#siteMenu a[href="catalog.html"]').click();
+            await page.waitForURL('**/catalog.html');
+            console.log('PASS mobile nine pages, full-screen menu and page transition');
+            await page.close();
             await browser.close();
+            console.log('ALL GOLD EXPERIENCE QA CHECKS PASSED');
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
-      - name: Save visual QA result and screenshots
+      - name: Save diagnostics and screenshots to repository
         if: always()
         shell: bash
         run: |
           mkdir -p concepts/previews
-          if [ -f /tmp/zubr-qa.log ]; then cp /tmp/zubr-qa.log concepts/previews/v2-qa-status.txt; else echo "Browser step was not reached." > concepts/previews/v2-qa-status.txt; fi
+          if [ -f /tmp/gold-qa.log ]; then cp /tmp/gold-qa.log concepts/previews/gold-experience-qa.txt; else echo "Browser QA did not start" > concepts/previews/gold-experience-qa.txt; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add concepts/previews
+          git add concepts/previews/gold-experience-*
           if ! git diff --cached --quiet; then
-            git commit -m "Record browser QA results for four different websites"
+            git commit -m "Capture ZUBR GOLD cinematic browser QA and desktop/mobile previews"
+            git pull --rebase
             git push
           fi
