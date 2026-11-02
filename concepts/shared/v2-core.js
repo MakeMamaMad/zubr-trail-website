@@ -36,8 +36,8 @@
     function theme(v){document.documentElement.dataset.theme=v;document.getElementById("themeButton").setAttribute("aria-label",v==="dark"?"Включить светлую тему":"Включить тёмную тему")}
     theme(initial);
     document.getElementById("themeButton").addEventListener("click",()=>{let next=document.documentElement.dataset.theme==="dark"?"light":"dark";theme(next);try{localStorage.setItem(key,next)}catch(e){}});
-    const menu=document.getElementById("menuButton")||document.getElementById("mobileMenu");
-    if(menu)menu.addEventListener("click",()=>{const nav=document.getElementById("nav"),opened=nav.classList.toggle("open");menu.setAttribute("aria-expanded",String(opened))});
+    const menus=[document.getElementById("menuButton"),document.getElementById("mobileMenu")].filter(Boolean);
+    menus.forEach(menu=>menu.addEventListener("click",()=>{const nav=document.getElementById("nav"),opened=nav.classList.toggle("open");menus.forEach(b=>b.setAttribute("aria-expanded",String(opened)))}));
     document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-filter]").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll("[data-group]").forEach(x=>{x.hidden=b.dataset.filter!=="all"&&b.dataset.filter!==x.dataset.group})}));
     const group=p.get("type");if(group)document.querySelector('[data-filter="'+group+'"]')?.click();
     document.getElementById("compareButton")?.addEventListener("click",()=>{
