@@ -1,0 +1,35 @@
+name: Check ZUBR TRAIL site
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check JavaScript syntax
+        run: node --check assets/site-v3.js
+      - name: Verify pages, media and navigation
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          pages = ["index.html","models.html","model.html","technology.html","production.html","test-drive.html","news.html","article.html","contacts.html"]
+          assets = ["hero","sat-150","sat-197","sat-500","sat-510","sat-545","sat-550","aluminum","factory","road"]
+          for page in pages:
+              text = Path(page).read_text(encoding="utf-8")
+              assert "site-v3.js" in text and "site-v3.css" in text, page
+              assert 'lang="ru"' in text and "data-page=" in text, page
+          for name in assets:
+              file = Path("assets")/(name+".webp")
+              assert file.is_file() and file.stat().st_size > 8000, file
+          js = Path("assets/site-v3.js").read_text(encoding="utf-8")
+          for name in pages:
+              assert name in js, name
+          assert "Современные полуприцепы для ваших задач." in js
+          assert "ТЕХНОЛОГИИ И ПРЕИМУЩЕСТВА" in js
+          assert "ЗУБР" not in js.upper()
+          print("All pages, routes and image assets are available.")
+          PY
