@@ -1,5 +1,7 @@
-PASS 34 rows, 68 checkboxes, public results loaded
-PASS choice caps, two counters, confirmation and persistent GitHub issue link
-PASS filters and search
-Error: Mobile horizontal overflow 305 px
-    at [stdin]:49:23
+locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('.ballot-row').first() to be visible
+
+    at [stdin]:11:45 {
+  name: 'TimeoutError'
+}
