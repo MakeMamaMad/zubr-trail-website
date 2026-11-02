@@ -71,6 +71,7 @@ jobs:
               if(!(await page.locator('#techDetail').innerText()).includes('Системы разгрузки'))throw Error(folder+': technology tabs broken');
               await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/index.html',{waitUntil:'domcontentloaded'});
               await page.locator('#theme').click();
+              await page.locator('#theme').click();
               await page.screenshot({path:'concepts/previews/'+folder+'.png',fullPage:false});
               await page.setViewportSize({width:390,height:844});
               await page.reload({waitUntil:'domcontentloaded'});
