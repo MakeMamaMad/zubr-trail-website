@@ -72,6 +72,19 @@ jobs:
                 if(broken.length)throw Error(folder+'/'+route+' broken images: '+broken.join(' '));
                 if(errors.length)throw Error(folder+'/'+route+' JS errors: '+errors.join('; '));
               }
+              for(const id of ['SAT-150','SAT-197','SAT-500','SAT-510','SAT-545','SAT-550']){
+                const url='http://127.0.0.1:8123/concepts/'+folder+'/model.html?id='+id;
+                await page.goto(url,{waitUntil:'networkidle'});
+                if(!(await page.locator('h1').first().innerText()).includes(id))throw Error(folder+' wrong model title for '+id);
+                if(await page.locator('a[href="test-drive.html?model='+id+'"]').count()===0)throw Error(folder+' missing model inquiry for '+id);
+              }
+              await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/test-drive.html?model=SAT-510',{waitUntil:'networkidle'});
+              const selected=await page.locator('select[name="model"]').inputValue();
+              if(selected!=='SAT-510')throw Error(folder+' test-drive preselection failed: '+selected);
+              for(const slug of ['aluminum','grain','floor']){
+                await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/article.html?slug='+slug,{waitUntil:'networkidle'});
+                if(await page.locator('h1').count()!==1)throw Error(folder+' article route failed: '+slug);
+              }
               await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/catalog.html',{waitUntil:'networkidle'});
               if(await page.locator('[data-group]').count()!==6)throw Error(folder+' six models missing');
               await page.locator('[data-filter=grain]').click();
