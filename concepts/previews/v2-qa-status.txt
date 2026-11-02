@@ -1,4 +1,1 @@
-01-forge: 9 pages, images, catalogue filter, compare, technology, theme and mobile menu all passed
-02-atelier: 9 pages, images, catalogue filter, compare, technology, theme and mobile menu all passed
-03-terrain: 9 pages, images, catalogue filter, compare, technology, theme and mobile menu all passed
-04-vector: 9 pages, images, catalogue filter, compare, technology, theme and mobile menu all passed
+Browser step was not reached.
