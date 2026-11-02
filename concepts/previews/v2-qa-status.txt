@@ -1,9 +1,31 @@
 01-forge: 9 pages, images, catalogue filter, compare, technology, theme and mobile menu all passed
-locator.click: Error: strict mode violation: locator('#menuButton').or(locator('#mobileMenu')) resolved to 2 elements:
-    1) <button id="menuButton" class="mobile-toggle" aria-expanded="false" aria-label="Открыть меню">☰</button> aka locator('#menuButton')
-    2) <button id="mobileMenu" class="mobile-toggle" aria-expanded="false" aria-label="Открыть меню">☰</button> aka locator('#mobileMenu')
-
+locator.click: Timeout 30000ms exceeded.
 Call log:
-  - waiting for locator('#menuButton').or(locator('#mobileMenu'))
+  - waiting for locator('#mobileMenu:visible, #menuButton:visible').first()
+    - locator resolved to <button id="menuButton" class="mobile-toggle" aria-expanded="false" aria-label="Открыть меню">☰</button>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - element is outside of the viewport
+    - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - element is outside of the viewport
+    - retrying click action
+      - waiting 100ms
+    58 × waiting for element to be visible, enabled and stable
+       - element is visible, enabled and stable
+       - scrolling into view if needed
+       - done scrolling
+       - element is outside of the viewport
+     - retrying click action
+       - waiting 500ms
 
-    at [stdin]:47:16
+    at [stdin]:47:16 {
+  name: 'TimeoutError'
+}
