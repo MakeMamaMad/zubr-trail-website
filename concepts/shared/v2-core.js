@@ -1,8 +1,8 @@
 (function core(){
   const data=window.ZUBR_DATA;
-  const asset=n=>"../../assets/"+n;
+  const asset=n=>{const design=document.body.dataset.design;const color=design==="forge"?"gold":design==="pulse"?"lime":null;return color&&/\.(?:webp|jpg)$/.test(n)?"../../assets/colorways/"+color+"/"+n.replace(/\.(?:webp|jpg)$/,".webp"):"../../assets/"+n};
   const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-  const img=(file,alt,cl="")=>'<img class="'+cl+'" src="'+asset(file)+'" alt="'+esc(alt)+'" loading="lazy">';
+  const img=(file,alt,cl="")=>'<img class="'+cl+'" src="'+asset(file)+'" data-fallback="../../assets/'+file+'" alt="'+esc(alt)+'" loading="lazy">';
   const btn=(s,url,kind="")=>'<a class="btn '+kind+'" href="'+url+'">'+s+' <span>↗</span></a>';
   const routeModel=m=>"model.html?id="+m.id;
   const nav=[["Главная","index.html"],["Каталог","catalog.html"],["Технологии","technology.html"],["Производство","production.html"],["Тест-драйв","test-drive.html"],["Журнал","news.html"],["Контакты","contacts.html"]];
@@ -11,7 +11,7 @@
   const cfg={forge:"01 / FORGE",pure:"02 / ATELIER",terrain:"03 / TERRAIN",pulse:"04 / VECTOR"};
   function header(design){
     const contents=logo()+'<nav id="nav" class="nav">'+links()+'</nav><div class="nav-right"><span class="edition">'+cfg[design]+'</span><button class="theme-button" id="themeButton" aria-label="Переключить тему">☀ / ☾</button><button class="mobile-toggle" id="menuButton" aria-label="Открыть меню" aria-expanded="false">☰</button></div>';
-    return (design==="pure"||design==="pulse")?'<aside class="side-navigation">'+contents+'</aside><header class="mobile-bar">'+logo()+'<button class="mobile-toggle" id="mobileMenu" aria-label="Открыть меню" aria-expanded="false">☰</button></header>':'<header class="main-navigation">'+contents+'</header>';
+    return design==="pure"?'<aside class="side-navigation">'+contents+'</aside><header class="mobile-bar">'+logo()+'<button class="mobile-toggle" id="mobileMenu" aria-label="Открыть меню" aria-expanded="false">☰</button></header>':'<header class="main-navigation">'+contents+'</header>';
   }
   function footer(design){return '<footer class="footer"><div class="footer-main">'+logo()+'<div><strong>Современные полуприцепы для ваших задач</strong><p>Каталог · Технологии · Тест-драйв · Контакты</p></div>'+btn("Обратная связь","contacts.html")+'</div><div class="footer-note"><span>ZUBR TRAIL © '+new Date().getFullYear()+'</span><span>Дизайн '+cfg[design]+' / Отдельная концепция</span><span>Изображения — визуализации, характеристики зависят от исполнения</span></div></footer>'}
   const parts={
@@ -32,7 +32,7 @@
     const p=new URLSearchParams(location.search);
     const html=variant[page]?variant[page](p):variant.home(p);
     document.getElementById("app").innerHTML='<div class="site site-'+design+'">'+header(design)+'<main>'+html+'</main>'+footer(design)+'</div>';
-    const key="zubr-v2-"+design;let initial=design==="pure"?"light":"dark";try{initial=localStorage.getItem(key)||initial}catch(e){}
+    const key="zubr-v2-"+design;let initial=(design==="pure"||design==="pulse")?"light":"dark";try{initial=localStorage.getItem(key)||initial}catch(e){}
     function theme(v){document.documentElement.dataset.theme=v;document.getElementById("themeButton").setAttribute("aria-label",v==="dark"?"Включить светлую тему":"Включить тёмную тему")}
     theme(initial);
     document.getElementById("themeButton").addEventListener("click",()=>{let next=document.documentElement.dataset.theme==="dark"?"light":"dark";theme(next);try{localStorage.setItem(key,next)}catch(e){}});
@@ -50,5 +50,6 @@
     const form=document.getElementById("driveForm");if(form){form.querySelector('[name="model"]').value=p.get("model")||"";form.addEventListener("submit",e=>{e.preventDefault();if(!form.reportValidity())return;const x=new FormData(form);const lines=["Запрос ZUBR TRAIL","Имя: "+x.get("name"),"Телефон: "+x.get("phone"),"Модель: "+x.get("model"),"Компания: "+(x.get("company")||"—"),"Задача: "+(x.get("task")||"—")].join("\n");document.getElementById("formFeedback").textContent="Почтовая программа откроется с подготовленным письмом. Оно не отправлено автоматически.";location.href="mailto:info@satpricep.by?subject="+encodeURIComponent("ZUBR TRAIL — тест-драйв")+"&body="+encodeURIComponent(lines)})}
     const go=document.getElementById("heroSelectGo");if(go)go.addEventListener("click",()=>location.href="model.html?id="+document.getElementById("heroSelect").value);
   }
+  document.addEventListener("error",e=>{const el=e.target;if(el&&el.tagName==="IMG"&&el.dataset.fallback&&el.getAttribute("src")!==el.dataset.fallback){el.src=el.dataset.fallback;}},true);
   document.addEventListener("DOMContentLoaded",boot);
 })();
