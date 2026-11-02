@@ -19,7 +19,7 @@ const models=[
 const cards=document.getElementById('modelCards'),modal=document.getElementById('modelModal'),form=document.getElementById('leadForm');
 function paint(filter='all'){
 const current=models.filter(m=>filter==='all'||m.type===filter);
-cards.innerHTML=current.map((m,i)=>'<article class="model-card"><div class="copy"><h3>'+m.id+'</h3><p>'+m.name+'</p></div><div class="visual"><img src="./assets/truck.svg" alt="Иллюстрация полуприцепа '+m.id+'" style="width:100%;height:100%;object-fit:contain;'+(m.id==='SAT-197'?'filter:hue-rotate(20deg)':'filter:grayscale(1) brightness(1.3)')+'"></div><footer><span>Подробнее о модели</span><button type="button" data-model="'+m.id+'" aria-label="Характеристики '+m.id+'">→</button></footer></article>').join('');
+cards.innerHTML=current.map((m,i)=>'<article class="model-card"><div class="copy"><h3>'+m.id+'</h3><p>'+m.name+'</p></div><div class="visual"><img src="'+(m.id==='SAT-197'?'./assets/panel.svg':'./assets/truck.svg')+'" alt="Иллюстрация полуприцепа '+m.id+'" style="width:100%;height:100%;object-fit:contain;'+(m.id==='SAT-197'?'':'filter:grayscale(1) brightness(1.3)')+'"></div><footer><span>Подробнее о модели</span><button type="button" data-model="'+m.id+'" aria-label="Характеристики '+m.id+'">→</button></footer></article>').join('');
 }
 paint();
 document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-filter]').forEach(n=>n.classList.remove('active'));b.classList.add('active');paint(b.dataset.filter)}));
