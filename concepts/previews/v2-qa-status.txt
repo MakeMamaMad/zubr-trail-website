@@ -1,2 +1,8 @@
-Error: 01-forge technology tabs failed
-    at [stdin]:34:94
+Error: 01-forge technology tabs failed: 02 / Функциональность
+ВАРИАНТЫ РАЗГРУЗКИ
+
+Подвижный пол, задняя и комбинированная разгрузка для разных условий.
+
+Подобрать технику
+↗
+    at [stdin]:34:117
