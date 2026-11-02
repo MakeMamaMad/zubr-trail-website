@@ -135,7 +135,13 @@ jobs:
             for(const route of pages){
               await openRoute(route);
               const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
-              if(overflow>5)throw Error('Mobile horizontal overflow '+route+': '+overflow+'px');
+              if(overflow>5){
+                const offenders=await page.evaluate(()=>[...document.querySelectorAll('body *')].map(el=>{
+                  const r=el.getBoundingClientRect();
+                  return {tag:el.tagName,cls:String(el.className).slice(0,80),right:Math.round(r.right),width:Math.round(r.width)};
+                }).filter(o=>o.right>innerWidth+5).slice(0,10));
+                throw Error('Mobile horizontal overflow '+route+': '+overflow+'px; offenders '+JSON.stringify(offenders));
+              }
             }
             await openRoute('index.html');
             await page.screenshot({path:'concepts/previews/gold-experience-mobile.png',fullPage:false});

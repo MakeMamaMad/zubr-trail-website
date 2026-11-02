@@ -25,7 +25,7 @@
   const selected=models.find(m=>m.id===search.get("id"))||models[2];
   const article=articles.find(a=>a.slug===search.get("slug"))||articles[0];
   const brand='<a href="index.html" class="brand-mark" aria-label="ZUBR TRAIL — главная">'+
-    '<span class="brand-mark-symbol">Z<span>◆</span></span>'+
+    '<span class="brand-mark-symbol"><img src="../../assets/logo.svg" alt=""></span>'+
     '<span class="brand-mark-text"><b>ZUBR</b><em>TRAIL</em></span></a>';
   const header=()=>'<header class="site-header" id="siteHeader"><div class="head-left">'+brand+
     '<span class="head-divider"></span><span class="head-caption">СОВРЕМЕННЫЕ ПОЛУПРИЦЕПЫ</span></div>'+
