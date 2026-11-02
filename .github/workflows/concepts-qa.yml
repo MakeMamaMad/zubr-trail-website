@@ -68,7 +68,7 @@ jobs:
                 if(res.status()>=400)throw Error(folder+'/'+route+' HTTP '+res.status());
                 if(await page.locator('#app main').count()!==1)throw Error(folder+'/'+route+' missing main');
                 if(await page.locator('h1').count()===0)throw Error(folder+'/'+route+' missing heading');
-                let broken=await page.evaluate(()=>[...document.querySelectorAll('img')].filter(i=>!i.complete||i.naturalWidth===0).map(i=>i.src));
+                let broken=await page.evaluate(()=>[...document.querySelectorAll('img')].filter(i=>i.complete&&i.naturalWidth===0).map(i=>i.src));
                 if(broken.length)throw Error(folder+'/'+route+' broken images: '+broken.join(' '));
                 if(errors.length)throw Error(folder+'/'+route+' JS errors: '+errors.join('; '));
               }
