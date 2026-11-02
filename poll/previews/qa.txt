@@ -1,0 +1,18 @@
+PASS 34 rows, 68 checkboxes, public results loaded
+locator.check: Clicking the checkbox did not change its state
+Call log:
+  - waiting for locator('input[data-vote="desktop"][data-id="schmitz"]')
+    - locator resolved to <input type="checkbox" data-id="schmitz" data-vote="desktop" aria-label="Schmitz Cargobull — лучшая версия для компьютера"/>
+  - attempting click action
+    - waiting for element to be visible, enabled and stable
+    - element is visible, enabled and stable
+    - scrolling into view if needed
+    - done scrolling
+    - performing click action
+    - click action done
+    - waiting for scheduled navigations to finish
+    - navigations have finished
+
+    at [stdin]:18:71 {
+  name: 'Error'
+}
