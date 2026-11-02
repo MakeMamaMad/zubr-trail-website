@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1018">
+  <meta name="description" content="Голосование за лучший сайт производителя полуприцепов: 31 компания и ZUBR POWER, GOLD, LIME. Отдельная оценка десктопной и мобильной версии.">
+  <title>DESIGN LEAGUE — голосование за лучший сайт полуприцепов | ZUBR TRAIL</title>
+  <meta property="og:title" content="34 сайта. Два победителя. DESIGN LEAGUE by ZUBR TRAIL">
+  <meta property="og:description" content="Выберите лучшие версии для компьютера и смартфона. Публичное голосование с итогами.">
+  <link rel="icon" href="../assets/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css?v=1">
+  <script src="./app.js?v=1" defer></script>
+</head>
+<body>
+  <header class="header">
+    <a class="identity" href="../index.html" aria-label="ZUBR TRAIL — основной сайт"><span class="identity-shape">Z</span><span class="identity-copy"><strong>ZUBR TRAIL</strong><small>DESIGN LEAGUE / 2026</small></span></a>
+    <nav class="header-nav" aria-label="Навигация"><a href="#ballot">Голосование</a><a href="#results">Результаты</a><a href="#rules">Правила</a></nav>
+    <button class="share" id="shareLink" type="button" aria-label="Скопировать ссылку на голосование"><span>Поделиться</span> ↗</button>
+  </header>
+  <main>
+    <section class="hero"><div class="hero-grid" aria-hidden="true"></div><div class="hero-watermark" aria-hidden="true">34</div>
+      <div class="hero-body"><div class="eyebrow"><span class="live-dot"></span> НЕЗАВИСИМОЕ ГОЛОСОВАНИЕ · 2026</div>
+        <h1>БИТВА<br><em>САЙТОВ.</em><br>КТО ЛУЧШЕ?</h1>
+        <p>31 производитель полуприцепов и 3 концепции ZUBR TRAIL. Выберите сайты, которые действительно лучше выглядят и работают <strong>на компьютере</strong> и <strong>на смартфоне</strong>.</p>
+        <div class="hero-actions"><a class="primary-btn" href="#ballot">Голосовать <span>↗</span></a><a class="ghost-btn" href="#results">Посмотреть результаты <span>→</span></a></div>
+      </div>
+      <div class="hero-side"><div class="side-number">31<span>+</span>3</div><div class="side-small">ПРОИЗВОДИТЕЛЯ / КОНЦЕПЦИИ</div><div class="side-divider"></div><div class="side-info"><b>02</b><span>НЕЗАВИСИМЫЕ<br>НОМИНАЦИИ</span></div><div class="side-info"><b>03</b><span>МАКСИМУМ ВЫБОРА<br>В КАЖДОЙ НОМИНАЦИИ</span></div></div>
+    </section>
+    <section class="metrics-strip" aria-label="Общая информация"><div><strong>34</strong><span>САЙТА В СПИСКЕ</span></div><div><strong>02</strong><span>ТИПА ВЁРСТКИ</span></div><div><strong>03</strong><span>ВЫБОРА НА КАТЕГОРИЮ</span></div><div><strong>01</strong><span>ГОЛОС НА GITHUB-АККАУНТ</span></div></section>
+    <section class="instructions" id="rules"><div class="instructions-intro"><span class="section-kicker">01 / КАК ЭТО РАБОТАЕТ</span><h2>СМОТРИТЕ.<br><em>СРАВНИВАЙТЕ.</em><br>ВЫБИРАЙТЕ.</h2></div>
+      <div class="steps"><div><span>01</span><h3>Откройте сайты</h3><p>По кнопке «Сайт ↗» откройте официальный ресурс производителя. Для равного сравнения посмотрите оба формата.</p></div><div><span>02</span><h3>Оцените вёрстку</h3><p>Для ПК: композиция и удобство. Для телефона: меню, адаптивность, читаемость и скорость доступа к каталогу.</p></div><div><span>03</span><h3>Поставьте галочки</h3><p>Отметьте до трёх лучших сайтов в каждом столбце. Один и тот же сайт можно выбрать в двух категориях.</p></div><div><span>04</span><h3>Подтвердите голос</h3><p>Голос сохраняется после подтверждения в GitHub. Нужен аккаунт GitHub; результаты открыты всем и обновляются автоматически.</p></div></div>
+    </section>
+    <section class="ballot-section" id="ballot"><div class="section-heading"><div><span class="section-kicker">02 / ВАШЕ РЕШЕНИЕ</span><h2>ГОЛОСОВАНИЕ<span class="slash"> // </span>34</h2><p>Ставьте отдельные галочки за качество <strong>версии для ПК</strong> и <strong>мобильной версии</strong>.</p></div><div class="selection-summaries"><div class="summary-tile"><span>СТАЦИОНАРНАЯ ВЕРСИЯ</span><strong id="desktopCount">0 / 3</strong><small>Лучшие сайты для компьютера</small></div><div class="summary-tile mobile-tile"><span>МОБИЛЬНАЯ ВЕРСИЯ</span><strong id="mobileCount">0 / 3</strong><small>Лучшие сайты для телефона</small></div></div></div>
+      <div class="ballot-toolbar"><div class="filter-pills" role="group" aria-label="Фильтр сайтов"><button class="active" data-filter="all" aria-pressed="true">Все <b>34</b></button><button data-filter="zubr" aria-pressed="false">ZUBR TRAIL <b>3</b></button><button data-filter="other" aria-pressed="false">Производители <b>31</b></button><button data-filter="chosen" aria-pressed="false">Отмеченные</button></div><label class="search-field"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="Найти производителя" autocomplete="off" aria-label="Поиск по названию производителя"></label></div>
+      <div class="table-wrap"><div class="ballot-columns"><span>САЙТ ПРОИЗВОДИТЕЛЯ / КОНЦЕПЦИЯ</span><span>СТАЦИОНАРНАЯ <small>ПК / НОУТБУК</small></span><span>МОБИЛЬНАЯ <small>СМАРТФОН</small></span><span>ССЫЛКИ</span></div><div id="ballotRows" class="ballot-rows" aria-live="polite"><div class="initial-loading">Загрузка 34 участников…</div></div></div>
+      <div id="emptyState" class="empty-state" hidden>По этому запросу ничего не найдено. Измените фильтр или поиск.</div>
+      <div class="ballot-notice"><span>!</span><p><strong>Важное условие:</strong> для сохранения голосов откроется GitHub. Войдите в свой аккаунт и нажмите <b>Submit new issue</b>. Пока это действие не выполнено, голос не отправлен. Публично будет видно имя вашего GitHub-профиля, но не телефон или электронная почта.</p></div>
+    </section>
+    <section class="results-section" id="results"><div class="results-header"><div><span class="section-kicker">03 / ТЕКУЩИЙ СЧЁТ</span><h2>ДВА<br><em>ПОБЕДИТЕЛЯ.</em></h2><p>Рейтинги считаются отдельно. От одного аккаунта учитывается только последний корректный бюллетень.</p></div><div class="result-total"><small>ПОДТВЕРЖДЁННЫХ БЮЛЛЕТЕНЕЙ</small><strong id="totalBallots">—</strong><span id="resultUpdated">Проверяем результаты…</span><button id="refreshResults" type="button">Обновить ↻</button></div></div><div class="leaderboards"><div class="leaderboard"><div class="leaderboard-heading"><span class="screen-icon">▣</span><div><small>01 / DESKTOP AWARD</small><h3>Лучший сайт для ПК</h3></div></div><div id="desktopLeaderboard" class="leaderboard-list"><p>Загружаем результаты…</p></div></div><div class="leaderboard"><div class="leaderboard-heading"><span class="screen-icon mobile-icon">▯</span><div><small>02 / MOBILE AWARD</small><h3>Лучшая мобильная версия</h3></div></div><div id="mobileLeaderboard" class="leaderboard-list"><p>Загружаем результаты…</p></div></div></div><div class="results-foot"><a href="https://github.com/MakeMamaMad/zubr-trail-website/issues?q=is%3Aissue+%22%5BZUBR-VOTE-2026%5D%22" target="_blank" rel="noopener noreferrer">Смотреть публичные бюллетени ↗</a><span>Итог — мнение участников, а не автоматический технический аудит.</span></div></section>
+  </main>
+  <div class="selection-tray" id="selectionTray" aria-label="Выбранные варианты"><div class="tray-summary"><span class="tray-label">ВАШ ВЫБОР</span><div><span class="desktop-picto" aria-hidden="true">▣</span> ПК <strong id="trayDesktop">0 / 3</strong></div><div><span class="mobile-picto" aria-hidden="true">▯</span> Телефон <strong id="trayMobile">0 / 3</strong></div></div><div class="tray-actions"><button id="resetBallot" class="reset-btn" type="button">Сбросить</button><button id="submitBallot" class="submit-btn" type="button" disabled>Подтвердить выбор на GitHub <span>↗</span></button></div></div>
+  <dialog id="confirmationDialog" class="confirmation-dialog"><div class="dialog-inner"><button type="button" id="closeDialog" class="dialog-close" aria-label="Закрыть окно">×</button><span class="section-kicker">ПРОВЕРКА БЮЛЛЕТЕНЯ</span><h2>ВАШ ВЫБОР<br><em>ГОТОВ.</em></h2><div id="dialogSummary"></div><p>Для реального подсчёта голосов откройте GitHub и нажмите <strong>Submit new issue</strong>. Результаты обновятся после обработки бюллетеня.</p><div class="dialog-buttons"><button type="button" id="backDialog" class="ghost-btn">Изменить выбор</button><a id="confirmIssue" class="primary-btn" target="_blank" rel="noopener noreferrer" href="#">Открыть GitHub для отправки ↗</a></div><small>GitHub-вход обязателен. Заполнение формы на этой странице само по себе не является отправкой голоса.</small></div></dialog>
+  <footer class="footer"><div><span>DESIGN LEAGUE</span><h2>ХОРОШИЙ ДИЗАЙН<br>ДОЛЖЕН <em>РАБОТАТЬ.</em></h2></div><div class="footer-bottom"><span>Организатор: ZUBR TRAIL · 2026</span><span>31 производитель из предоставленного реестра от 16.10.2026 + 3 наших концепции</span><a href="../index.html">На сайт ZUBR TRAIL ↗</a></div></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

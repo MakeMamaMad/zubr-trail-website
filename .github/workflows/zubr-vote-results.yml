@@ -1,0 +1,38 @@
+name: Count ZUBR DESIGN LEAGUE ballots
+on:
+  issues:
+    types: [opened, edited, deleted, closed, reopened]
+  workflow_dispatch:
+permissions:
+  contents: write
+  issues: read
+concurrency:
+  group: zubr-design-league-tally
+  cancel-in-progress: false
+jobs:
+  tally:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate vote counter
+        run: python poll/tally.py --test
+      - name: Tally latest valid ballot per GitHub author
+        run: python poll/tally.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+      - name: Publish live results to GitHub Pages
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add poll/results.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Update ZUBR DESIGN LEAGUE public voting results'
+            git pull --rebase
+            git push
+          fi

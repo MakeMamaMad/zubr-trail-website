@@ -1,0 +1,314 @@
+{
+  "poll_id": "zubr-design-vote-2026",
+  "source": "31_manufacturers_PDF_collection(1).zip / INDEX.csv",
+  "source_date": "2026-10-16",
+  "limit_per_category": 3,
+  "participants": [
+    {
+      "id": "stas",
+      "name": "STAS",
+      "group": "other",
+      "url": "https://www.stas.be/en-gb/semi-trailers",
+      "reference": "Agrostar",
+      "brochure": "https://www.stas.be/storage/trailer_translations/technical_sheet/151/agrostar.pdf",
+      "number": 1
+    },
+    {
+      "id": "benalu",
+      "name": "Benalu",
+      "group": "other",
+      "url": "https://www.benalu.com/",
+      "reference": "Bulkliner",
+      "brochure": "https://www.benalu.com/wp-content/uploads/22FLYER-BULKLINER-GB.pdf",
+      "number": 2
+    },
+    {
+      "id": "schmitz",
+      "name": "Schmitz Cargobull",
+      "group": "other",
+      "url": "https://www.cargobull.com/en/",
+      "reference": "S.KI LIGHT / S.KI range",
+      "brochure": "https://www.cargobull.com/-/media/project/scb-sites/scb-global-site/media-center-en/brochure-ski-tipper-semi-trailer.pdf",
+      "number": 3
+    },
+    {
+      "id": "wielton",
+      "name": "Wielton",
+      "group": "other",
+      "url": "https://wielton.com.pl/",
+      "reference": "Weight Master Agro / tipper range",
+      "brochure": "https://wielton.com.pl/wp-content/uploads/2017/05/WIELTON-NACZEPY-WYWROTKI-ENG.pdf",
+      "number": 4
+    },
+    {
+      "id": "knapen",
+      "name": "Knapen",
+      "group": "other",
+      "url": "https://www.knapen-trailers.com/",
+      "reference": "NEXT / moving floor range",
+      "brochure": "https://www.knapen-trailers.com/sites/default/files/2023-02/KNAP_folder_productrange%20%202023%20EN%20web.pdf",
+      "number": 5
+    },
+    {
+      "id": "kraker",
+      "name": "Kraker",
+      "group": "other",
+      "url": "https://www.krakertrailers.eu/",
+      "reference": "K-Force",
+      "brochure": "https://www.krakertrailers.eu/dbfotos/trailer/f236632c7928c7aa76a1dc912889008ba27d4a9e.pdf",
+      "number": 6
+    },
+    {
+      "id": "legras",
+      "name": "Legras",
+      "group": "other",
+      "url": "https://legras-industries.com/",
+      "reference": "FMA moving floor",
+      "brochure": "https://legras-industries.com/IMG/pdf/triptyque-floors-2018-2-3.pdf",
+      "number": 7
+    },
+    {
+      "id": "schwarzmueller",
+      "name": "Schwarzmueller",
+      "group": "other",
+      "url": "https://www.schwarzmueller.com/",
+      "reference": "Large-scale tipper semitrailers",
+      "brochure": "https://www.schwarzmueller.com/wp-content/uploads/2024/05/large-scale_tipper_semitrailers_202102.pdf",
+      "number": 8
+    },
+    {
+      "id": "carnehl",
+      "name": "Carnehl",
+      "group": "other",
+      "url": "https://en.carnehl.eu/",
+      "reference": "Tipper semi-trailer range",
+      "brochure": "https://en.carnehl.eu/_mediafiles/31.pdf",
+      "number": 9
+    },
+    {
+      "id": "fliegl",
+      "name": "Fliegl",
+      "group": "other",
+      "url": "https://fliegl-trailer.com/",
+      "reference": "Revolution tipper",
+      "brochure": "https://fliegl-trailer.com/fileadmin/presse/2022/09/Revolution/Revolution_GB.pdf",
+      "number": 10
+    },
+    {
+      "id": "langendorf",
+      "name": "Langendorf",
+      "group": "other",
+      "url": "https://www.langendorf.de/",
+      "reference": "Tipper range incl. Alu Agrar",
+      "brochure": "https://www.langendorf.de/_media/downloads/fahrzeuge/180809_Kipper_Gesamt_Programm_GB.pdf",
+      "number": 11
+    },
+    {
+      "id": "reisch",
+      "name": "Reisch",
+      "group": "other",
+      "url": "https://reisch-fahrzeugbau.de/",
+      "reference": "Alubox R",
+      "brochure": "https://reisch-fahrzeugbau.de/wp-content/uploads/2024/11/Alubox-R_leaflet.pdf",
+      "number": 12
+    },
+    {
+      "id": "kempf",
+      "name": "KEMPF",
+      "group": "other",
+      "url": "https://kempf.ag/",
+      "reference": "Moving floor / Schubboden",
+      "brochure": "https://kempf.ag/wp-content/uploads/2022/01/13-Schubboden.pdf",
+      "number": 13
+    },
+    {
+      "id": "zaslaw",
+      "name": "Zaslaw",
+      "group": "other",
+      "url": "https://www.zaslaw.pl/",
+      "reference": "Aluminium tipper model 65",
+      "brochure": "https://www.zaslaw.pl/!data/offer/karta-65.pdf",
+      "number": 14
+    },
+    {
+      "id": "menci",
+      "name": "Menci",
+      "group": "other",
+      "url": "https://www.menci.it/",
+      "reference": "MARTE moving floor",
+      "brochure": "https://www.menci.it/domini/15/schedeTecniche/ITA/17P_Piano_Mobile_MARTE_ITA_39.pdf",
+      "number": 15
+    },
+    {
+      "id": "tmt",
+      "name": "TMT",
+      "group": "other",
+      "url": "https://www.tmtinternational.it/",
+      "reference": "Moving floor product range",
+      "brochure": "https://www.tmtinternational.it/wp-content/uploads/2025/06/Brochiure-TMT-2025-ITALIANO-web.pdf",
+      "number": 16
+    },
+    {
+      "id": "weightlifter",
+      "name": "Weightlifter",
+      "group": "other",
+      "url": "https://weightlifterbodies.com/",
+      "reference": "Aluminium half barrel trailer",
+      "brochure": "https://weightlifterbodies.com/wp-content/uploads/2021/02/ALUMINIUM-HALF-BARREL-TRAILER-STRAIGHT-FRAME.pdf",
+      "number": 17
+    },
+    {
+      "id": "kaessbohrer",
+      "name": "Kaessbohrer",
+      "group": "other",
+      "url": "https://kaessbohrer.com/",
+      "reference": "K.SKS B / 27 tipper",
+      "brochure": "https://kaessbohrer.com/uploads/static/media/product/709/attachments/auto_pdf/brochure_709_en.pdf",
+      "number": 18
+    },
+    {
+      "id": "meiller",
+      "name": "MEILLER",
+      "group": "other",
+      "url": "https://www.meiller.com/",
+      "reference": "Tipper semitrailer series 44/3",
+      "brochure": "https://www.meiller.com/media/Fahrzeugbau/DE/documents/produkte/kippsattel/datenblaetter/de_1599_datenblatt_kippsattel_baureihe_44_3.pdf",
+      "number": 19
+    },
+    {
+      "id": "koegel",
+      "name": "Koegel",
+      "group": "other",
+      "url": "https://www.koegel.com/",
+      "reference": "Tipper range",
+      "brochure": "https://www.koegel.com/wp-content/uploads/2026/04/26_03_31_Kippfahrzeuge_EN_web.pdf",
+      "number": 20
+    },
+    {
+      "id": "krone",
+      "name": "KRONE",
+      "group": "other",
+      "url": "https://www.krone-trailer.com/",
+      "reference": "Profi Liner 4-CS",
+      "brochure": "https://www.krone-trailer.com/fileadmin/media/downloads/DE/Pritschensattelauflieger/Datenblaetter/Profi_Liner/Profi_Liner_4-CS_DE.pdf",
+      "number": 21
+    },
+    {
+      "id": "feldbinder",
+      "name": "Feldbinder",
+      "group": "other",
+      "url": "https://www.feldbinder.com/",
+      "reference": "Silo/tanker - no public product brochure discovered",
+      "brochure": null,
+      "number": 22
+    },
+    {
+      "id": "spitzer",
+      "name": "Spitzer",
+      "group": "other",
+      "url": "https://www.spitzer-silo.com/",
+      "reference": "Dry bulk tanker product brochure",
+      "brochure": "https://www.spitzer-silo.com/wp-content/uploads/2026/09/SPITZER-008171_Aktualisierung_Werbemittel_Fahrzeugbro_EN_AS.pdf",
+      "number": 23
+    },
+    {
+      "id": "nooteboom",
+      "name": "Nooteboom",
+      "group": "other",
+      "url": "https://www.nooteboom.com/",
+      "reference": "Low-loader - no public product brochure discovered",
+      "brochure": null,
+      "number": 24
+    },
+    {
+      "id": "faymonville",
+      "name": "Faymonville",
+      "group": "other",
+      "url": "https://www.faymonville.com/",
+      "reference": "Heavy haul product range",
+      "brochure": "https://www.faymonville.com/files/96240.pdf",
+      "number": 25
+    },
+    {
+      "id": "goldhofer",
+      "name": "Goldhofer",
+      "group": "other",
+      "url": "https://www.goldhofer.com/",
+      "reference": "Semitrailer range",
+      "brochure": "https://www.goldhofer.com/fileadmin/downloads/BRO_TT/EN/BRO_SEMITRAILER_EN.pdf",
+      "number": 26
+    },
+    {
+      "id": "chereau",
+      "name": "Chereau",
+      "group": "other",
+      "url": "https://www.chereau.com/",
+      "reference": "Refrigerated semitrailer - body/chassis manual",
+      "brochure": "https://www.chereau.com/wp-content/uploads/2024/10/bodywork-and-chassis-en-1.pdf",
+      "number": 27
+    },
+    {
+      "id": "lamberet",
+      "name": "Lamberet",
+      "group": "other",
+      "url": "https://www.lamberet.fr/",
+      "reference": "SR2 SuperDuplex",
+      "brochure": "https://www.lamberet.fr/upload_pdf_vehicule/Lamberet_-_brochure_SR2_SuperDuplex_-_fr.pdf",
+      "number": 28
+    },
+    {
+      "id": "bodex",
+      "name": "BODEX",
+      "group": "other",
+      "url": "https://www.bodex.com.pl/pl/produkt/ruchoma-podloga",
+      "reference": "Aluminium tipper / moving floor",
+      "brochure": null,
+      "number": 29
+    },
+    {
+      "id": "tecnokar",
+      "name": "Tecnokar",
+      "group": "other",
+      "url": "https://tecnokar.it/",
+      "reference": "Aluminium semi-trailers",
+      "brochure": null,
+      "number": 30
+    },
+    {
+      "id": "wilcox",
+      "name": "Wilcox / TVS Interfleet",
+      "group": "other",
+      "url": "https://tvsinterfleet.com/wilcox/",
+      "reference": "Aluminium tippers / Megalite walking floor",
+      "brochure": null,
+      "number": 31
+    },
+    {
+      "id": "zubr-power",
+      "name": "ZUBR POWER",
+      "group": "zubr",
+      "url": "https://makemamamad.github.io/zubr-trail-website/index.html",
+      "reference": "Собственная концепция ZUBR TRAIL",
+      "brochure": null,
+      "number": 32
+    },
+    {
+      "id": "zubr-gold",
+      "name": "ZUBR GOLD",
+      "group": "zubr",
+      "url": "https://makemamamad.github.io/zubr-trail-website/concepts/01-forge/index.html",
+      "reference": "Собственная концепция ZUBR TRAIL",
+      "brochure": null,
+      "number": 33
+    },
+    {
+      "id": "zubr-lime",
+      "name": "ZUBR LIME",
+      "group": "zubr",
+      "url": "https://makemamamad.github.io/zubr-trail-website/concepts/04-vector/index.html",
+      "reference": "Собственная концепция ZUBR TRAIL",
+      "brochure": null,
+      "number": 34
+    }
+  ]
+}
