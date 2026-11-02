@@ -80,7 +80,7 @@ jobs:
             if(await page.locator('.story-chapter').count()!==4)throw Error('Home: engineering story missing');
             if(await page.locator('[data-lab]').count()!==8)throw Error('Home: engineering hotspots missing');
             await page.locator('.lab-switch[data-lab="1"]').click();
-            if(!(await page.locator('#labTitle').innerText()).includes('Варианты разгрузки'))throw Error('Home: lab hotspot does not update');
+            if(!(await page.locator('#labTitle').textContent()).includes('Варианты разгрузки'))throw Error('Home: lab hotspot does not update');
             const rail=page.locator('#modelRail');
             const before=await rail.evaluate(el=>el.scrollLeft);
             await page.locator('[data-rail-dir="1"]').click();
@@ -97,6 +97,8 @@ jobs:
             if(initialTheme===switched)throw Error('Theme switch did not work');
             await page.locator('#themeButton').click();
             console.log('PASS cinematic rail, engineering hotspot, full-screen menu, theme switch');
+            await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+            await page.waitForTimeout(250);
             await page.screenshot({path:'concepts/previews/gold-experience-desktop.png',fullPage:false});
             await page.screenshot({path:'concepts/previews/gold-experience-full.png',fullPage:true});
             await openRoute('catalog.html');
@@ -119,7 +121,7 @@ jobs:
             console.log('PASS six individual model pages');
             await openRoute('technology.html');
             await page.locator('[data-tech="2"]').click();
-            if(!(await page.locator('#techCurrentTitle').innerText()).includes('Конструктивная прочность'))throw Error('Technology switch broken');
+            if(!(await page.locator('#techCurrentTitle').textContent()).includes('Конструктивная прочность'))throw Error('Technology switch broken');
             await openRoute('test-drive.html?model=SAT-510');
             if(await page.locator('select[name=model]').inputValue()!=='SAT-510')throw Error('Prefilled test-drive model broken');
             await page.locator('input[name=name]').fill('Тест');
