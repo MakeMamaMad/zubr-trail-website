@@ -61,7 +61,7 @@ jobs:
             if((await page.locator("#totalBallots").innerText())==="—")throw Error("Public results did not load");
             console.log("PASS 34 rows, 68 checkboxes, public results loaded");
             for(const id of ["zubr-gold","stas","benalu"])await page.locator('input[data-vote="desktop"][data-id="'+id+'"]').check();
-            await page.locator('input[data-vote="desktop"][data-id="schmitz"]').check();
+            await page.locator('input[data-vote="desktop"][data-id="schmitz"]').click();
             if(await page.locator('input[data-vote="desktop"][data-id="schmitz"]').isChecked())throw Error("4th desktop vote incorrectly accepted");
             await page.locator('input[data-vote="mobile"][data-id="zubr-lime"]').check();
             if((await page.locator("#desktopCount").innerText())!=="3 / 3")throw Error("Desktop counter wrong");
