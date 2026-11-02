@@ -3,5 +3,5 @@ PASS cinematic rail, engineering hotspot, full-screen menu, theme switch
 PASS atlas, filters, model preview, comparison
 PASS six individual model pages
 PASS technology interactions, test-drive form, all article routes
-Error: Mobile horizontal overflow index.html: 99px
-    at [stdin]:85:25
+PASS mobile nine pages, full-screen menu and page transition
+ALL GOLD EXPERIENCE QA CHECKS PASSED
