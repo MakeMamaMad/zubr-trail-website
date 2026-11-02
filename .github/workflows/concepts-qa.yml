@@ -52,10 +52,10 @@ jobs:
           (async()=>{
             const browser=await chromium.launch({headless:true});
             const cases=[
-              ['01-forge','f-hero'],
+              ['01-forge','g-hero'],
               ['02-atelier','a-home'],
               ['03-terrain','t-mainhero'],
-              ['04-vector','v-dashboard']
+              ['04-vector','l-hero']
             ];
             const pages=['index.html','catalog.html','model.html?id=SAT-510','technology.html','production.html','test-drive.html','news.html','article.html?slug=aluminum','contacts.html'];
             fs.mkdirSync('concepts/previews',{recursive:true});
@@ -83,6 +83,19 @@ jobs:
               const techText=await page.locator('#techOutput').innerText(); if(!techText.toLowerCase().includes('варианты разгрузки'))throw Error(folder+' technology tabs failed: '+techText.slice(0,280));
               await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/index.html',{waitUntil:'networkidle'});
               if(await page.locator('.'+hero).count()!==1)throw Error(folder+' distinct homepage missing');
+              if(folder==='01-forge'){
+                if(await page.locator('.g-featured-products .product').count()!==6)throw Error('GOLD featured model grid incomplete');
+                if(await page.locator('.g-cargo-grid a').count()!==4)throw Error('GOLD cargo selector incomplete');
+              }
+              if(folder==='04-vector'){
+                if(await page.locator('[data-lime-model]').count()!==6)throw Error('LIME product configurator incomplete');
+                await page.locator('[data-lime-model="SAT-510"]').click();
+                if((await page.locator('#selectedModelLabel').innerText())!=='SAT-510')throw Error('LIME model selection not updated');
+                if(!(await page.locator('#limeRequestLink').getAttribute('href')).includes('SAT-510'))throw Error('LIME request link not updated');
+                if(!(await page.locator('#limeSpecs').innerText()).includes('49'))throw Error('LIME specs not updated');
+                await page.locator('[data-wizard-step="3"]').click();
+                if(!(await page.locator('#wizardHeadline').innerText()).includes('SAT-510'))throw Error('LIME configuration wizard not updated');
+              }
               const before=await page.locator('html').getAttribute('data-theme');
               await page.locator('#themeButton').click();
               const after=await page.locator('html').getAttribute('data-theme');
