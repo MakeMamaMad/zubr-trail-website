@@ -1,0 +1,95 @@
+name: ZUBR TRAIL Four Concept Visual QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'concepts/shared/**'
+      - 'concepts/*/*.html'
+      - '.github/workflows/concepts-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  browser-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check source and files
+        run: |
+          node --check concepts/shared/site.js
+          python - <<'PY'
+          from pathlib import Path
+          concepts=['01-forge','02-atelier','03-terrain','04-vector']
+          pages=['index.html','catalog.html','model.html','technology.html','production.html','test-drive.html','news.html','article.html','contacts.html']
+          for name in concepts:
+            for page in pages:
+              p=Path('concepts')/name/page
+              assert p.is_file() and 'site.js' in p.read_text(),p
+          for n in ['hero.webp','road.webp','aluminum.webp','factory.webp','sat-150.webp','sat-197.webp','sat-500.webp','sat-510.jpg','sat-545.webp','sat-550.webp']:
+            p=Path('assets')/n
+            assert p.is_file() and p.stat().st_size>7000,p
+          print('Four sites, 36 pages, all product image files verified')
+          PY
+      - name: Install headless browser
+        run: |
+          npm install --no-save playwright@1.55.1
+          npx playwright install --with-deps chromium
+      - name: Browser smoke checks and screenshots
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8123 --bind 127.0.0.1 >/tmp/zubr-http.log 2>&1 &
+          node <<'NODE'
+          const {chromium}=require('playwright');
+          const fs=require('fs');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            fs.mkdirSync('concepts/previews',{recursive:true});
+            const projects=['01-forge','02-atelier','03-terrain','04-vector'];
+            const pages=['index.html','catalog.html','model.html?id=SAT-510','technology.html','production.html','test-drive.html','news.html','article.html?slug=aluminum','contacts.html'];
+            for(const folder of projects){
+              const page=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
+              const errs=[];
+              page.on('pageerror',e=>errs.push(e.message));
+              for(const pathname of pages){
+                await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/'+pathname,{waitUntil:'domcontentloaded'});
+                const count=await page.locator('#app main').count();
+                if(count!==1)throw Error(folder+'/'+pathname+': main missing');
+                if(errs.length)throw Error(folder+'/'+pathname+': '+errs.join('; '));
+              }
+              await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/catalog.html',{waitUntil:'domcontentloaded'});
+              if(await page.locator('.product-card').count()!==6)throw Error(folder+': expected six models');
+              await page.locator('.filter[data-filter="grain"]').click();
+              if(await page.locator('.product-card:visible').count()!==2)throw Error(folder+': grain filter broken');
+              await page.locator('#compareBtn').click();
+              if(await page.locator('.compare-table').count()!==1)throw Error(folder+': comparison broken');
+              await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/technology.html',{waitUntil:'domcontentloaded'});
+              await page.locator('.tech-tab[data-tech="unload"]').click();
+              if(!(await page.locator('#techDetail').innerText()).includes('Системы разгрузки'))throw Error(folder+': technology tabs broken');
+              await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/index.html',{waitUntil:'domcontentloaded'});
+              await page.locator('#theme').click();
+              await page.screenshot({path:'concepts/previews/'+folder+'.png',fullPage:false});
+              await page.setViewportSize({width:390,height:844});
+              await page.reload({waitUntil:'domcontentloaded'});
+              if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+6))throw Error(folder+': mobile overflow');
+              await page.locator('#menu').click();
+              if(!(await page.locator('#nav').evaluate(e=>e.classList.contains('open'))))throw Error(folder+': mobile menu broken');
+              await page.close();
+              console.log(folder+': 9 pages, comparison, filters, tabs, themes and mobile menu OK');
+            }
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - name: Save visual previews to repository
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add concepts/previews/*.png
+          if ! git diff --cached --quiet; then
+            git commit -m "Capture four concept browser previews after smoke testing"
+            git push
+          fi
