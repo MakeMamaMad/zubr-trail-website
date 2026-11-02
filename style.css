@@ -37,3 +37,42 @@
 /* Graceful asset fallback if image import has not finished yet */
 .hero{background-image:linear-gradient(90deg,#07080b55,#07080b25),url('./assets/hero.webp'),url('./assets/truck.svg');background-size:cover,cover,min(75vw,1000px) auto;background-position:center,center,right bottom;background-repeat:no-repeat}
 .banner{background-image:linear-gradient(90deg,#07080b99,#07080b44),url('./assets/road.webp'),url('./assets/truck.svg');background-size:cover,cover,65% auto;background-position:center,center,right bottom;background-repeat:no-repeat}
+
+/* ZUBR POWER: screenshot-led layout refinement */
+.shell{width:min(1480px,calc(100% - 64px))}
+.site-header{height:78px}
+.header-inner{max-width:1480px;gap:34px}
+.brand{gap:13px}
+.brand-mark{width:65px;height:58px}
+.brand-word{font-size:36px;line-height:.76}
+.brand-word small{font-size:21px}
+.desktop-nav{margin-left:auto;gap:clamp(22px,2vw,37px);font-size:16px}
+.header-control{margin-left:14px}
+.hero{min-height:760px;background:#0a0b0e url('./assets/hero.webp') center 58% / cover no-repeat!important}
+.hero:after{background:linear-gradient(90deg,rgba(5,6,8,.95) 0%,rgba(5,6,8,.81) 27%,rgba(5,6,8,.52) 45%,rgba(5,6,8,.10) 73%),linear-gradient(0deg,rgba(5,6,8,.6),transparent 40%);z-index:-1}
+.hero-clouds,.hero-road,.hero-truck,.banner-truck{display:none!important}
+.hero-content{padding-top:66px;padding-bottom:74px}
+.hero-title{font-size:clamp(56px,5.4vw,87px);max-width:790px;letter-spacing:-.032em}
+.hero-sub{max-width:480px;font-size:20px}
+.hero-points{margin-top:26px;gap:14px}
+.model-card{background:var(--surface);border-radius:12px;box-shadow:0 15px 35px #0002}
+.model-card .copy{padding:22px 24px 0}
+.model-card h3{font-size:41px}
+.model-card .visual{height:245px;padding:0;display:flex;align-items:stretch;justify-content:center}
+.model-card .visual img{height:100%;width:100%;object-fit:cover;object-position:center center;display:block}
+.model-card footer{padding:15px 24px 23px}
+.tech{padding-bottom:72px}
+.tech .aluminum-art{right:0;top:9%;width:38%;height:85%;opacity:.68;object-fit:cover;object-position:center;mask-image:linear-gradient(to right,transparent,black 36%)}
+.tech-grid{max-width:950px}
+.production{width:min(1480px,calc(100% - 64px));margin:48px auto 0;min-height:340px;border-radius:14px;overflow:hidden;border:1px solid var(--line);grid-template-columns:1fr 1fr}
+.factory-visual{min-height:340px}
+.factory-visual img{display:block;width:100%;height:100%;object-fit:cover;object-position:54% center}
+.production .story{padding:42px clamp(32px,4vw,70px)}
+.banner{width:min(1480px,calc(100% - 64px));min-height:405px;margin:34px auto 60px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#171a1e url('./assets/road.webp') center center / cover no-repeat!important}
+.banner:before{background:linear-gradient(90deg,#080b0eef 0%,#080b0edd 31%,#080b0e60 61%,transparent 90%)}
+.banner .shell{width:calc(100% - 90px)}
+.banner h2{font-size:clamp(40px,4.2vw,65px);max-width:680px}
+.site-footer{margin-top:15px}
+@media(max-width:1100px){.desktop-nav{gap:13px;font-size:13px}.brand-word{font-size:29px}.brand-mark{width:51px}.hero{background-position:61% center!important}.tech .aluminum-art{opacity:.32}}
+@media(max-width:800px){.shell{width:calc(100% - 38px)}.site-header{height:68px}.desktop-nav{top:68px;gap:0}.desktop-nav a{font-size:16px}.hero{min-height:680px;background-position:65% center!important}.hero-title{font-size:clamp(46px,8.7vw,66px)}.hero:after{background:linear-gradient(90deg,#050608f2 0%,#050608d7 45%,#05060872 100%)}.production,.banner{width:calc(100% - 38px)}.production{grid-template-columns:1fr}.factory-visual{min-height:280px}.banner{margin-top:28px;min-height:380px;background-position:66% center!important}.banner .shell{width:calc(100% - 35px)}.model-card .visual{height:215px}}
+@media(max-width:520px){.hero{min-height:700px;background-position:68% center!important}.hero-title{font-size:clamp(44px,11vw,56px)}.hero-sub{font-size:16px}.brand-word{font-size:27px}.brand-mark{width:47px}.model-card .visual{height:225px}.production{margin-top:32px}.banner{margin-bottom:36px}.banner h2{font-size:43px}}
