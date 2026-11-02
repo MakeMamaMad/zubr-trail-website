@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://makemamamad.github.io/zubr-trail-website/sitemap.xml
