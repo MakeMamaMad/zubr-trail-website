@@ -1,31 +1,4 @@
 01-forge: 9 pages, images, catalogue filter, compare, technology, theme and mobile menu all passed
-locator.click: Timeout 30000ms exceeded.
-Call log:
-  - waiting for locator('#mobileMenu:visible, #menuButton:visible').first()
-    - locator resolved to <button id="menuButton" class="mobile-toggle" aria-expanded="false" aria-label="Открыть меню">☰</button>
-  - attempting click action
-    2 × waiting for element to be visible, enabled and stable
-      - element is visible, enabled and stable
-      - scrolling into view if needed
-      - done scrolling
-      - element is outside of the viewport
-    - retrying click action
-    - waiting 20ms
-    2 × waiting for element to be visible, enabled and stable
-      - element is visible, enabled and stable
-      - scrolling into view if needed
-      - done scrolling
-      - element is outside of the viewport
-    - retrying click action
-      - waiting 100ms
-    58 × waiting for element to be visible, enabled and stable
-       - element is visible, enabled and stable
-       - scrolling into view if needed
-       - done scrolling
-       - element is outside of the viewport
-     - retrying click action
-       - waiting 500ms
-
-    at [stdin]:47:16 {
-  name: 'TimeoutError'
-}
+02-atelier: 9 pages, images, catalogue filter, compare, technology, theme and mobile menu all passed
+Error: 03-terrain/catalog.html broken images: http://127.0.0.1:8123/assets/sat-550.webp
+    at [stdin]:23:30
