@@ -80,7 +80,7 @@ jobs:
               if(await page.locator('#compareOutput table').count()!==1)throw Error(folder+' compare failed');
               await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/technology.html',{waitUntil:'networkidle'});
               await page.locator('[data-adv="1"]').click();
-              if(!(await page.locator('#techOutput').innerText()).includes('Варианты разгрузки'))throw Error(folder+' technology tabs failed');
+              const techText=await page.locator('#techOutput').innerText(); if(!techText.includes('Варианты разгрузки'))throw Error(folder+' technology tabs failed: '+techText.slice(0,280));
               await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/index.html',{waitUntil:'networkidle'});
               if(await page.locator('.'+hero).count()!==1)throw Error(folder+' distinct homepage missing');
               const before=await page.locator('html').getAttribute('data-theme');
