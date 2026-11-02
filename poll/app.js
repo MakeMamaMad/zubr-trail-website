@@ -1,161 +1,104 @@
 'use strict';
 (() => {
-  const SOURCE = 'https://github.com/MakeMamaMad/zubr-trail-website/issues/new';
-  const STORAGE = 'zubr-design-league-ballot-2026-v1';
-  const PREFIX = '[ZUBR-VOTE-2026]';
-  const MAX = 3;
+  const repo = 'https://github.com/MakeMamaMad/zubr-trail-website/issues/new';
+  const storageKey = 'zubr-design-league-ballot-2026-v1';
+  const max = 3;
   let participants = [];
-  const selected = {desktop: new Set(), mobile: new Set()};
-  let filter = 'all';
-  let query = '';
-  let toastTimer;
-  const $ = (selector) => document.querySelector(selector);
-  const $$ = (selector) => Array.from(document.querySelectorAll(selector));
-  const escape = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c]));
-  const validId = id => participants.some(p => p.id === id);
-  const chosenCount = () => selected.desktop.size + selected.mobile.size;
-  const urlSafe = raw => {try { const u = new URL(raw); return u.protocol === 'https:' ? u.href : '#'; } catch(e) { return '#'; }};
-  function toast(message) {
-    const el = $('#toast'); el.textContent = message;
-    el.classList.add('is-shown'); clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('is-shown'), 3000);
+  let results = {desktop:{}, mobile:{}, ballots:0};
+  const picks = {desktop:new Set(), mobile:new Set()};
+  const $ = s => document.querySelector(s);
+  const node = (tag, text, css) => {const el=document.createElement(tag);if(text!==undefined)el.textContent=String(text);if(css)el.className=css;return el};
+  const getCount = type => picks[type].size;
+  const isValid = id => participants.some(p=>p.id===id);
+  const serialize = () => {try{localStorage.setItem(storageKey,JSON.stringify({desktop:[...picks.desktop],mobile:[...picks.mobile]}))}catch(e){}};
+  function restore(){try{const j=JSON.parse(localStorage.getItem(storageKey)||'{}');for(const type of ['desktop','mobile'])for(const id of (Array.isArray(j[type])?j[type].slice(0,max):[]))if(isValid(id))picks[type].add(id)}catch(e){}}
+  function message(s){$('#message').textContent=s}
+  function issueUrl(){
+    const body=['<!-- ZUBR_VOTE_V1 -->','### DESIGN LEAGUE / БЮЛЛЕТЕНЬ','','DESKTOP: '+[...picks.desktop].sort().join(','),'MOBILE: '+[...picks.mobile].sort().join(','),'','Публичное голосование за лучший сайт производителя полуприцепов.','Один последний корректный бюллетень на GitHub-аккаунт. Изменить выбор можно, отредактировав этот issue.'].join('\n');
+    const u=new URL(repo);u.searchParams.set('title','[ZUBR-VOTE-2026] Мой выбор');u.searchParams.set('body',body);return u.toString();
   }
-  function persist() {
-    try { localStorage.setItem(STORAGE, JSON.stringify({desktop:[...selected.desktop], mobile:[...selected.mobile]})); } catch(e) {}
+  function updateCounters(){
+    const d=getCount('desktop'),m=getCount('mobile');
+    $('#countDesktop').textContent=d+' / '+max;
+    $('#countMobile').textContent=m+' / '+max;
+    $('#footerDesktop').textContent=d+' / '+max;
+    $('#footerMobile').textContent=m+' / '+max;
+    const link=$('#sendVote');
+    if(d+m===0){link.classList.add('disabled');link.setAttribute('aria-disabled','true');link.href='#'}
+    else{link.classList.remove('disabled');link.setAttribute('aria-disabled','false');link.href=issueUrl()}
   }
-  function restore() {
-    try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE) || '{}');
-      for(const cat of ['desktop','mobile']){
-        if(Array.isArray(saved[cat])) for(const id of saved[cat].slice(0,MAX)) if(validId(id)) selected[cat].add(id);
-      }
-    } catch(e) {}
+  function checkbox(p,type){
+    const cell=node('td',undefined,'vote-cell');
+    const label=node('label');
+    const input=document.createElement('input');
+    input.type='checkbox';input.dataset.vote=type;input.dataset.id=p.id;
+    input.checked=picks[type].has(p.id);
+    input.setAttribute('aria-label',p.name+': лучший сайт для '+(type==='desktop'?'компьютера':'телефона'));
+    label.append(input);cell.append(label);
+    return cell;
   }
-  const initials = name => name.split(/\s|\//).filter(Boolean).slice(0,2).map(w => w[0]?.toUpperCase()).join('');
-  function rowTemplate(p) {
-    const isZubr = p.group === 'zubr';
-    const isPicked = selected.desktop.has(p.id) || selected.mobile.has(p.id);
-    return `<article class="ballot-row ${isZubr ? 'is-zubr' : ''} ${isPicked ? 'is-selected' : ''}" data-id="${escape(p.id)}" data-group="${escape(p.group)}">
-      <div class="brand-info"><div class="brand-avatar" aria-hidden="true">${escape(isZubr ? 'Z' : initials(p.name))}</div>
-      <div class="brand-title">${isZubr ? '<span class="own-label">ZUBR TRAIL / НАШ ДИЗАЙН</span>' : ''}<strong>${escape(p.name)}</strong><small title="${escape(p.reference)}">${escape(p.reference || 'Официальный сайт')}</small></div></div>
-      <label class="pick desktop ${selected.desktop.has(p.id) ? 'is-checked' : ''}" title="Отметить ${escape(p.name)} как лучший сайт для компьютера"><input type="checkbox" data-vote="desktop" data-id="${escape(p.id)}" ${selected.desktop.has(p.id) ? 'checked' : ''} aria-label="${escape(p.name)} — лучшая версия для компьютера"><span>Для ПК</span></label>
-      <label class="pick mobile ${selected.mobile.has(p.id) ? 'is-checked' : ''}" title="Отметить ${escape(p.name)} как лучший сайт для телефона"><input type="checkbox" data-vote="mobile" data-id="${escape(p.id)}" ${selected.mobile.has(p.id) ? 'checked' : ''} aria-label="${escape(p.name)} — лучшая мобильная версия"><span>Телефон</span></label>
-      <div class="brand-links"><a class="site-link" href="${escape(urlSafe(p.url))}" target="_blank" rel="noopener noreferrer" aria-label="Открыть сайт ${escape(p.name)} в новой вкладке">Сайт ↗</a>${p.brochure ? `<a class="pdf-link" href="${escape(urlSafe(p.brochure))}" target="_blank" rel="noopener noreferrer" aria-label="Открыть каталог ${escape(p.name)}">Каталог ↗</a>` : ''}</div>
-    </article>`;
-  }
-  function visibleParticipants() {
-    return participants.filter(p => {
-      const groupMatch = filter === 'all' || (filter === 'chosen' ? selected.desktop.has(p.id) || selected.mobile.has(p.id) : p.group === filter);
-      const searchMatch = !query || (p.name+' '+p.reference).toLocaleLowerCase('ru').includes(query);
-      return groupMatch && searchMatch;
+  function render(){
+    const filter=$('#filter').value;
+    const search=$('#search').value.trim().toLocaleLowerCase('ru');
+    const visible=participants.filter(p=>{
+      if(filter==='zubr'&&p.group!=='zubr')return false;
+      if(filter==='other'&&p.group==='zubr')return false;
+      if(filter==='selected'&&!picks.desktop.has(p.id)&&!picks.mobile.has(p.id))return false;
+      return p.name.toLocaleLowerCase('ru').includes(search)||String(p.reference||'').toLocaleLowerCase('ru').includes(search);
     });
-  }
-  function renderRows() {
-    const list = visibleParticipants();
-    $('#ballotRows').innerHTML = list.map(rowTemplate).join('');
-    $('#emptyState').hidden = Boolean(list.length);
-    $$('[data-filter]').forEach(btn => {const active = btn.dataset.filter === filter; btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',String(active));});
-    updateCounts();
-  }
-  function updateCounts() {
-    const d = selected.desktop.size, m = selected.mobile.size;
-    $('#desktopCount').textContent = `${d} / ${MAX}`;
-    $('#mobileCount').textContent = `${m} / ${MAX}`;
-    $('#trayDesktop').textContent = `${d} / ${MAX}`;
-    $('#trayMobile').textContent = `${m} / ${MAX}`;
-    $('#submitBallot').disabled = d+m === 0;
-  }
-  function updateRowState(el) {
-    const row = el.closest('.ballot-row');
-    row.classList.toggle('is-selected', selected.desktop.has(row.dataset.id) || selected.mobile.has(row.dataset.id));
-    const label = el.closest('.pick');if(label)label.classList.toggle('is-checked',el.checked);
-  }
-  function handlePick(el) {
-    const cat = el.dataset.vote, id = el.dataset.id;
-    if(!['desktop','mobile'].includes(cat) || !validId(id))return;
-    if(el.checked) {
-      if(selected[cat].size >= MAX) {
-        el.checked = false;
-        toast(`Для ${cat === 'desktop' ? 'версии для компьютера' : 'мобильной версии'} можно выбрать не больше ${MAX} сайтов.`);
-      } else selected[cat].add(id);
-    } else selected[cat].delete(id);
-    updateRowState(el);updateCounts();persist();
-    if(filter === 'chosen' && !selected.desktop.has(id) && !selected.mobile.has(id))renderRows();
-  }
-  function getNames(cat) {return [...selected[cat]].map(id => participants.find(p=>p.id===id)?.name || id);}
-  function setupDialog() {
-    const dialog = $('#confirmationDialog');
-    const names = c => getNames(c).length ? getNames(c).map(escape).map(s=>'<span>✓ '+s+'</span>').join('') : '<span>Без выбора</span>';
-    $('#dialogSummary').innerHTML = `<div class="dialog-votes"><div><strong>▣ ЛУЧШИЕ ДЛЯ КОМПЬЮТЕРА</strong>${names('desktop')}</div><div><strong>▯ ЛУЧШИЕ ДЛЯ ТЕЛЕФОНА</strong>${names('mobile')}</div></div>`;
-    const desktop = [...selected.desktop].sort().join(',');
-    const mobile = [...selected.mobile].sort().join(',');
-    const body = [
-      '<!-- ZUBR_VOTE_V1 -->',
-      '### DESIGN LEAGUE / БЮЛЛЕТЕНЬ',
-      '',
-      'DESKTOP: '+desktop,
-      'MOBILE: '+mobile,
-      '',
-      'Публичное голосование за лучший сайт производителя полуприцепов.',
-      'Один последний корректный бюллетень на GitHub-аккаунт. Изменить выбор можно, отредактировав этот issue.'
-    ].join('\n');
-    const url = new URL(SOURCE);
-    url.searchParams.set('title', PREFIX+' Мой выбор');
-    url.searchParams.set('body',body);
-    $('#confirmIssue').href = url.toString();
-    if(typeof dialog.showModal === 'function')dialog.showModal();else toast('Откройте GitHub для подтверждения.');
-  }
-  const leaderSorted = (counts) => participants.slice().sort((a,b)=>(Number(counts?.[b.id]||0)-Number(counts?.[a.id]||0)) || a.number-b.number);
-  function renderLeaderboard(cat, counts, ballots) {
-    const el = $('#'+cat+'Leaderboard');
-    if(!ballots) {el.innerHTML='<div class="leaderboard-status">Голосование открыто — подтверждённых бюллетеней пока нет. Вы можете стать первым участником.</div>';return;}
-    const arr = leaderSorted(counts).filter(p=>Number(counts?.[p.id]||0)>0).slice(0,8);
-    const top = Math.max(1,...arr.map(p=>Number(counts[p.id])));
-    el.innerHTML = arr.map((p,i)=>{
-      const count = Number(counts[p.id]);
-      return `<div class="leaderboard-item"><span class="place">${String(i+1).padStart(2,'0')}</span><div><a class="item-name" href="${escape(urlSafe(p.url))}" target="_blank" rel="noopener noreferrer">${escape(p.name)} ↗</a><span class="bar-track"><span class="bar-fill" style="width:${Math.round(100*count/top)}%"></span></span></div><b class="votes">${count}</b></div>`;
-    }).join('') || '<div class="leaderboard-status">Пока нет отметок в этой категории.</div>';
-    el.closest('.leaderboard')?.classList.toggle('mobile',cat==='mobile');
-  }
-  async function loadResults() {
-    $('#resultUpdated').textContent = 'Загружаем результаты…';
-    try {
-      const res = await fetch('./results.json?ts='+Date.now(),{cache:'no-store'});
-      if(!res.ok)throw new Error('HTTP '+res.status);
-      const results = await res.json();
-      if(results.poll_id !== 'zubr-design-vote-2026') throw new Error('Unexpected poll ID');
-      const ballots = Number(results.ballots)||0;
-      $('#totalBallots').textContent = ballots;
-      $('#resultUpdated').textContent = results.updated_at ? 'Обновлено '+new Date(results.updated_at).toLocaleString('ru-RU') : 'Голосование открыто';
-      renderLeaderboard('desktop',results.desktop||{},ballots);
-      renderLeaderboard('mobile',results.mobile||{},ballots);
-    }catch(e){
-      $('#totalBallots').textContent='—';
-      $('#resultUpdated').textContent='Результаты временно недоступны';
-      $('#desktopLeaderboard').innerHTML='<div class="leaderboard-status">Не удалось загрузить счёт голосования. Попробуйте «Обновить».</div>';
-      $('#mobileLeaderboard').innerHTML='<div class="leaderboard-status">Не удалось загрузить счёт голосования. Попробуйте «Обновить».</div>';
+    const body=$('#tableBody');body.replaceChildren();
+    const frag=document.createDocumentFragment();
+    for(const p of visible){
+      const row=node('tr');row.dataset.id=p.id;
+      if(p.group==='zubr')row.classList.add('zubr-row');
+      if(picks.desktop.has(p.id)||picks.mobile.has(p.id))row.classList.add('my-choice');
+      row.append(node('td',p.number,'num'));
+      const title=node('td');title.append(node('span',p.name,'name-main'));
+      if(p.group==='zubr')title.append(node('span','ZUBR TRAIL — наша версия','name-sub'));
+      else if(p.reference)title.append(node('span',p.reference,'name-sub'));
+      row.append(title);
+      const linkCell=node('td');const site=node('a','Открыть ↗','web-link');
+      site.href=p.url;site.target='_blank';site.rel='noopener noreferrer';site.setAttribute('aria-label','Открыть сайт '+p.name);
+      linkCell.append(site);row.append(linkCell,checkbox(p,'desktop'),checkbox(p,'mobile'),node('td',results.desktop[p.id]||0,'count-cell'),node('td',results.mobile[p.id]||0,'count-cell'));
+      frag.append(row);
     }
+    if(!visible.length){const row=node('tr'),cell=node('td','По запросу ничего не найдено.','loading');cell.colSpan=7;row.append(cell);frag.append(row)}
+    body.append(frag);$('#totalCount').textContent=participants.length;updateCounters();
+  }
+  function changeVote(input){
+    const {id,vote:type}=input.dataset;
+    if(!isValid(id)||!['desktop','mobile'].includes(type))return;
+    if(input.checked){
+      if(picks[type].size>=max){input.checked=false;message('Можно выбрать не больше '+max+' сайтов для '+(type==='desktop'?'компьютера.':'телефона.'))}
+      else{picks[type].add(id);message('Отметка сохранена в браузере. Чтобы отправить голос, нажмите кнопку ниже.')}
+    }else{picks[type].delete(id);message('Отметка снята.')}
+    serialize();
+    const row=input.closest('tr');
+    row?.classList.toggle('my-choice',picks.desktop.has(id)||picks.mobile.has(id));
+    if($('#filter').value==='selected')render();else updateCounters();
+  }
+  async function refresh(){
+    $('#resultStatus').textContent='Загрузка…';
+    try{
+      const response=await fetch('results.json?t='+Date.now(),{cache:'no-store'});
+      if(!response.ok)throw Error('HTTP '+response.status);
+      const r=await response.json();if(r.poll_id!=='zubr-design-vote-2026')throw Error('Invalid results');
+      results={desktop:r.desktop||{},mobile:r.mobile||{},ballots:r.ballots||0};
+      $('#resultStatus').textContent='Бюллетеней: '+results.ballots;
+      render();
+    }catch(e){$('#resultStatus').textContent='Результаты временно недоступны'}
   }
   async function init(){
-    const res=await fetch('./participants.json',{cache:'no-store'});
-    if(!res.ok)throw new Error('participants.json unavailable');
-    const data=await res.json();
-    participants = data.participants || [];
-    if(participants.length!==34 || new Set(participants.map(p=>p.id)).size!==34)throw new Error('Invalid registry');
-    restore();renderRows();await loadResults();
-    $('#ballotRows').addEventListener('change',e=>{if(e.target.matches('input[data-vote]'))handlePick(e.target);});
-    $$('[data-filter]').forEach(btn=>btn.addEventListener('click',()=>{filter=btn.dataset.filter;renderRows();}));
-    $('#searchInput').addEventListener('input',e=>{query=e.target.value.trim().toLocaleLowerCase('ru');renderRows();});
-    $('#resetBallot').addEventListener('click',()=>{selected.desktop.clear();selected.mobile.clear();persist();renderRows();toast('Все отметки сброшены.');});
-    $('#submitBallot').addEventListener('click',setupDialog);
-    $('#refreshResults').addEventListener('click',loadResults);
-    $('#closeDialog').addEventListener('click',()=>$('#confirmationDialog').close());
-    $('#backDialog').addEventListener('click',()=>$('#confirmationDialog').close());
-    $('#confirmationDialog').addEventListener('click',e=>{if(e.target===$('#confirmationDialog'))e.target.close();});
-    $('#shareLink').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href);toast('Ссылка на голосование скопирована.');}catch(e){window.prompt('Скопируйте ссылку:',location.href);}});
+    const response=await fetch('participants.json',{cache:'no-store'});if(!response.ok)throw Error('Cannot load registry');
+    const r=await response.json();participants=r.participants||[];
+    if(participants.length!==34||new Set(participants.map(p=>p.id)).size!==34)throw Error('Incorrect participant registry');
+    restore();render();await refresh();
+    $('#tableBody').addEventListener('change',e=>{if(e.target.matches('input[data-vote]'))changeVote(e.target)});
+    $('#search').addEventListener('input',render);
+    $('#filter').addEventListener('change',render);
+    $('#reset').addEventListener('click',()=>{picks.desktop.clear();picks.mobile.clear();serialize();render();message('Отметки сброшены.')});
+    $('#refresh').addEventListener('click',refresh);
+    $('#sendVote').addEventListener('click',e=>{if(!getCount('desktop')&&!getCount('mobile'))e.preventDefault();else message('Для подтверждения нажмите Submit new issue на открывшейся странице GitHub.')});
   }
-  document.addEventListener('DOMContentLoaded',()=>init().catch(e=>{
-    console.error(e);$('#ballotRows').textContent='Не удалось загрузить список участников. Обновите страницу.';
-    $('#resultUpdated').textContent='Данные недоступны';toast('Ошибка загрузки участников.');
-  }));
+  document.addEventListener('DOMContentLoaded',()=>init().catch(e=>{console.error(e);$('#tableBody').innerHTML='<tr><td colspan="7" class="loading">Не удалось загрузить список. Обновите страницу.</td></tr>';message('Ошибка загрузки данных.')}));
 })();
