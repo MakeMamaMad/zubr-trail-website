@@ -17,3 +17,19 @@
 @media(max-width:800px){.site-header{height:68px}.shell{width:min(100% - 34px,1360px)}.desktop-nav{display:none;position:absolute;left:0;top:68px;width:100%;background:var(--nav);flex-direction:column;align-items:stretch;gap:0;border-bottom:1px solid var(--line)}.desktop-nav.open{display:flex}.desktop-nav a{padding:15px 24px;border-top:1px solid var(--line)}.menu-btn{display:block}.lang{display:none}.hero{min-height:690px;align-items:flex-start}.hero-content{padding-top:62px}.hero-title{font-size:clamp(48px,10vw,76px)}.hero-truck{right:-20%;bottom:6%;width:110%;opacity:.56}.hero:after{background:linear-gradient(180deg,#090b0fe9,#090b0fa1 64%,#090b0f66)}.models-grid{grid-template-columns:repeat(2,1fr)}.tech-grid{grid-template-columns:repeat(2,1fr);max-width:100%}.aluminum-art{opacity:.15;width:65%}.production{grid-template-columns:1fr}.factory-visual{min-height:260px}.banner-truck{width:80%;opacity:.25}.footer-inner{grid-template-columns:repeat(2,1fr)}.news-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.brand-word{font-size:26px}.brand-mark{width:43px}.hero-title{font-size:48px}.hero-sub{font-size:16px}.hero-points{gap:8px}.hero-truck{bottom:5%;width:130%;right:-40%}.point{font-size:13px}.point svg{width:33px;height:33px}.button{font-size:14px;padding:12px 18px}.models-grid,.news-grid,.contact-row{grid-template-columns:1fr}.model-card .visual{height:180px}.tech-card{min-height:140px}.tech-card svg{width:37px}.tech-card{font-size:13px}.section-title{font-size:43px}.production .story{padding:36px 22px}.banner{min-height:390px}.banner h2{font-size:47px}.footer-inner{grid-template-columns:1fr 1fr}.lead-form{grid-template-columns:1fr}.lead-form input,.lead-form select{grid-column:1/-1}.extra-header{display:block}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
+
+/* Original ZUBR TRAIL photorealistic visual campaign */
+.hero{background:#090a0c url('./assets/hero.webp') center center/cover no-repeat}
+.hero:after{background:linear-gradient(90deg,#06080de9 0%,#06080dce 28%,#06080d71 48%,#07080b0b 80%),linear-gradient(0deg,#030406a6,transparent 37%)}
+.hero-clouds,.hero-road,.hero-truck,.banner-truck{display:none}
+.hero-title{position:relative;text-shadow:0 5px 15px #000d}
+.model-card .visual{height:215px;padding:0 8px}
+.model-card .visual img{width:100%;height:100%;object-fit:contain;transition:transform .3s}
+.model-card:hover .visual img{transform:scale(1.035)}
+.tech .aluminum-art{width:39%;max-height:unset;height:100%;right:-2%;top:0;object-fit:cover;object-position:center;opacity:.52;mask-image:linear-gradient(to right,transparent 0%,black 43%)}
+.factory-visual{background:#15202a}
+.banner{background:#131a24 url('./assets/road.webp') center/cover no-repeat}
+.banner:before{background:linear-gradient(90deg,#07090de8 0%,#0a0d10d1 35%,#03040635 78%)}
+@media(max-width:1050px){.hero{background-position:60% center}.tech .aluminum-art{width:45%;opacity:.35}}
+@media(max-width:800px){.hero{background-position:68% center}.hero:after{background:linear-gradient(90deg,#06080df2,#06080dc0 58%,#06080d85)}.tech .aluminum-art{width:65%;opacity:.22}.model-card .visual{height:185px}.banner{background-position:65% center}}
+@media(max-width:520px){.hero{background-position:67% center}.hero:after{background:linear-gradient(90deg,#050608ef,#050608b3)}.model-card .visual{height:190px}}
