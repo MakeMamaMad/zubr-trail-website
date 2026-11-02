@@ -1,96 +1,114 @@
-name: ZUBR TRAIL Four Concept Visual QA
+name: ZUBR TRAIL Four Independent Site QA
 on:
   push:
     branches: [main]
     paths:
-      - 'concepts/shared/**'
-      - 'concepts/*/*.html'
-      - '.github/workflows/concepts-qa.yml'
+      - "concepts/**"
+      - ".github/workflows/concepts-qa.yml"
   workflow_dispatch:
 permissions:
   contents: write
 jobs:
-  browser-qa:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
-      - name: Check source and files
+          node-version: "22"
+      - name: Verify four independent website packages
         run: |
-          node --check concepts/shared/site.js
+          set -e
+          node --check concepts/shared/v2-data.js
+          node --check concepts/shared/v2-core.js
           python - <<'PY'
           from pathlib import Path
-          concepts=['01-forge','02-atelier','03-terrain','04-vector']
+          variants=['01-forge','02-atelier','03-terrain','04-vector']
           pages=['index.html','catalog.html','model.html','technology.html','production.html','test-drive.html','news.html','article.html','contacts.html']
-          for name in concepts:
-            for page in pages:
-              p=Path('concepts')/name/page
-              assert p.is_file() and 'site.js' in p.read_text(),p
-          for n in ['hero.webp','road.webp','aluminum.webp','factory.webp','sat-150.webp','sat-197.webp','sat-500.webp','sat-510.jpg','sat-545.webp','sat-550.webp']:
-            p=Path('assets')/n
-            assert p.is_file() and p.stat().st_size>7000,p
-          print('Four sites, 36 pages, all product image files verified')
+          for v in variants:
+              assert (Path('concepts')/v/'v2-view.js').exists()
+              assert (Path('concepts')/v/'v2-style.css').exists()
+              for p in pages:
+                  src=(Path('concepts')/v/p).read_text(encoding='utf-8')
+                  for s in ['v2-core.js','v2-view.js','v2-style.css','v2-data.js']:
+                      assert s in src,(v,p,s)
+          print('4 independent websites / 36 HTML pages verified')
           PY
-      - name: Install headless browser
+          for f in concepts/*/v2-view.js; do node --check "$f"; done
+      - name: Install Chromium browser
         run: |
           npm install --no-save playwright@1.55.1
           npx playwright install --with-deps chromium
-      - name: Browser smoke checks and screenshots
+      - name: Verify layouts and interactions; capture previews
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 8123 --bind 127.0.0.1 >/tmp/zubr-http.log 2>&1 &
+          python3 -m http.server 8123 --bind 127.0.0.1 >/tmp/zubr-site.log 2>&1 &
           node <<'NODE'
           const {chromium}=require('playwright');
           const fs=require('fs');
           (async()=>{
             const browser=await chromium.launch({headless:true});
-            fs.mkdirSync('concepts/previews',{recursive:true});
-            const projects=['01-forge','02-atelier','03-terrain','04-vector'];
+            const cases=[
+              ['01-forge','f-hero'],
+              ['02-atelier','a-home'],
+              ['03-terrain','t-mainhero'],
+              ['04-vector','v-dashboard']
+            ];
             const pages=['index.html','catalog.html','model.html?id=SAT-510','technology.html','production.html','test-drive.html','news.html','article.html?slug=aluminum','contacts.html'];
-            for(const folder of projects){
+            fs.mkdirSync('concepts/previews',{recursive:true});
+            for(const [folder,hero] of cases){
               const page=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
-              const errs=[];
-              page.on('pageerror',e=>errs.push(e.message));
-              for(const pathname of pages){
-                await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/'+pathname,{waitUntil:'domcontentloaded'});
-                const count=await page.locator('#app main').count();
-                if(count!==1)throw Error(folder+'/'+pathname+': main missing');
-                if(errs.length)throw Error(folder+'/'+pathname+': '+errs.join('; '));
+              const errors=[];
+              page.on('pageerror',e=>errors.push(e.message));
+              for(const route of pages){
+                let res=await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/'+route,{waitUntil:'networkidle'});
+                if(res.status()>=400)throw Error(folder+'/'+route+' HTTP '+res.status());
+                if(await page.locator('#app main').count()!==1)throw Error(folder+'/'+route+' missing main');
+                if(await page.locator('h1').count()===0)throw Error(folder+'/'+route+' missing heading');
+                let broken=await page.evaluate(()=>[...document.querySelectorAll('img')].filter(i=>!i.complete||i.naturalWidth===0).map(i=>i.src));
+                if(broken.length)throw Error(folder+'/'+route+' broken images: '+broken.join(' '));
+                if(errors.length)throw Error(folder+'/'+route+' JS errors: '+errors.join('; '));
               }
-              await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/catalog.html',{waitUntil:'domcontentloaded'});
-              if(await page.locator('.product-card').count()!==6)throw Error(folder+': expected six models');
-              await page.locator('.filter[data-filter="grain"]').click();
-              if(await page.locator('.product-card:visible').count()!==2)throw Error(folder+': grain filter broken');
-              await page.locator('#compareBtn').click();
-              if(await page.locator('.compare-table').count()!==1)throw Error(folder+': comparison broken');
-              await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/technology.html',{waitUntil:'domcontentloaded'});
-              await page.locator('.tech-tab[data-tech="unload"]').click();
-              if(!(await page.locator('#techDetail').innerText()).includes('Системы разгрузки'))throw Error(folder+': technology tabs broken');
-              await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/index.html',{waitUntil:'domcontentloaded'});
-              await page.locator('#theme').click();
-              await page.locator('#theme').click();
-              await page.screenshot({path:'concepts/previews/'+folder+'.png',fullPage:false});
+              await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/catalog.html',{waitUntil:'networkidle'});
+              if(await page.locator('[data-group]').count()!==6)throw Error(folder+' six models missing');
+              await page.locator('[data-filter=grain]').click();
+              if(await page.locator('[data-group]:visible').count()!==2)throw Error(folder+' grain filter incorrect');
+              await page.locator('#compareButton').click();
+              if(await page.locator('#compareOutput table').count()!==1)throw Error(folder+' compare failed');
+              await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/technology.html',{waitUntil:'networkidle'});
+              await page.locator('[data-adv="1"]').click();
+              if(!(await page.locator('#techOutput').innerText()).includes('Варианты разгрузки'))throw Error(folder+' technology tabs failed');
+              await page.goto('http://127.0.0.1:8123/concepts/'+folder+'/index.html',{waitUntil:'networkidle'});
+              if(await page.locator('.'+hero).count()!==1)throw Error(folder+' distinct homepage missing');
+              const before=await page.locator('html').getAttribute('data-theme');
+              await page.locator('#themeButton').click();
+              const after=await page.locator('html').getAttribute('data-theme');
+              if(before===after)throw Error(folder+' theme switch failed');
+              await page.locator('#themeButton').click();
+              await page.screenshot({path:'concepts/previews/v2-'+folder+'.png',fullPage:true});
               await page.setViewportSize({width:390,height:844});
-              await page.reload({waitUntil:'domcontentloaded'});
-              if(await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+6))throw Error(folder+': mobile overflow');
-              await page.locator('#menu').click();
-              if(!(await page.locator('#nav').evaluate(e=>e.classList.contains('open'))))throw Error(folder+': mobile menu broken');
+              await page.reload({waitUntil:'networkidle'});
+              if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+6))throw Error(folder+' mobile overflow');
+              const menu=page.locator('#menuButton').or(page.locator('#mobileMenu'));
+              await menu.click();
+              if(!(await page.locator('#nav').evaluate(e=>e.classList.contains('open'))))throw Error(folder+' mobile menu failed');
+              await page.screenshot({path:'concepts/previews/v2-'+folder+'-mobile.png',fullPage:false});
+              console.log(folder+': 9 pages, images, catalogue filter, compare, technology, theme and mobile menu all passed');
               await page.close();
-              console.log(folder+': 9 pages, comparison, filters, tabs, themes and mobile menu OK');
             }
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
-      - name: Save visual previews to repository
+      - name: Commit real screenshots
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add concepts/previews/*.png
+          git add concepts/previews/v2-*.png
           if ! git diff --cached --quiet; then
-            git commit -m "Capture four concept browser previews after smoke testing"
+            git commit -m "Capture independent ZUBR TRAIL website screenshots"
             git push
           fi
