@@ -1,0 +1,78 @@
+name: Import original ZUBR TRAIL imagery and deploy
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/import-assets.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: zubr-assets
+  cancel-in-progress: false
+jobs:
+  import-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Fetch original generated visuals
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --silent --show-error 'https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3-pro-image/images/6d566a15-5748-441a-bc21-943ff001ed39/6aba06ff-2971-4514-bc83-2c1e0e694ff8/Standalone_photorealistic_commercial_automotive_advertising_.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiOGJmNmFiY2E3YjEyNTI1MyIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5Mzc3MDA1OH0.w-nZg9e6joVoFthGuJJzGQAfY2MBkbcGzM4tF7l3Q40' --output "/tmp/hero.png"
+test -s "/tmp/hero.png"
+          curl --fail --location --retry 3 --silent --show-error 'https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3-pro-image/images/90d06811-1d90-480c-86e2-838d2d3762f8/232058e4-609e-4dda-ba45-8cb031cbb4ca/Premium_photorealistic_studio_product_photograph_of_a_modern.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiZDMwYTc2NjQ0NGNmY2M0YyIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5Mzc1NjY0NH0.8MYio1xlRBV5YSoAvfI-RwKbBn8rqjXSmuxvch-ekSQ' --output "/tmp/sat-150.png"
+test -s "/tmp/sat-150.png"
+          curl --fail --location --retry 3 --silent --show-error 'https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3-pro-image/images/d49ea429-5e09-4ab8-a3db-ce82682e8130/46a17dc2-84bd-497b-8b04-2ce3e47db44b/Premium_photorealistic_studio_product_photograph_of_a_red_op.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiZmMyNDFlNTliYzU3MTQ3ZSIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5Mzc0NTQ5N30.EseU6xzOqFRpgmj0Wgf73AQazhJmx13K8-KyaAMi8Xc' --output "/tmp/sat-197.png"
+test -s "/tmp/sat-197.png"
+          curl --fail --location --retry 3 --silent --show-error 'https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3-pro-image/images/16dd0109-471d-42eb-bbc8-5605bd999b3b/7def5a7a-c81f-4bb3-a448-ef17fee8e3f7/Premium_photorealistic_macro_industrial_product_photography_.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMWJhOGI5MmFjNDRjOGFiMiIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MzczODI4Mn0.XfDsRD0nHffxnUl8LgHGPabmcTXVbklehUWgaj_5gpU' --output "/tmp/aluminum.png"
+test -s "/tmp/aluminum.png"
+          curl --fail --location --retry 3 --silent --show-error 'https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3-pro-image/images/f812ccef-572a-4648-b7b4-8b21248518fb/1e925268-4c9e-4efe-8bb8-99adc762fb54/Photorealistic_industrial_factory_photography_of_modern_semi.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiZjQzYjA1MjcwMWJiNjgwYSIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MzczOTA0N30.KF_BXZ-brnAQVZPVnYxmq5k7HKeCjpksnGUN3VH2BlA' --output "/tmp/factory.png"
+test -s "/tmp/factory.png"
+          curl --fail --location --retry 3 --silent --show-error 'https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3-pro-image/images/27521b95-b99f-4206-a57b-deb2809ced15/d28e9c83-6c5c-4ca9-84a6-6f87666c5591/Single_standalone_photorealistic_commercial_vehicle_photogra.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiODRlYTk0MjFkN2JlOWE2NSIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MzczMjI1N30.CtZg-AvskR4YJhpyWmnW_AC4gHDC_fIZTkVc7y0vx98' --output "/tmp/road.png"
+test -s "/tmp/road.png"
+          curl --fail --location --retry 3 --silent --show-error 'https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3-pro-image/images/b1f27cd9-6009-469d-9a22-c4c1203b96fa/bcf490dc-5832-4d2d-9114-496afd2ee720/photorealistic_premium_standalone_studio_product_photograph_.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiOGFjZjBlNWViZmQ5ZDM5OCIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5Mzc1MDIzOH0.ZYPTaCOBW3A6D1PrtK9lmrgbS1Y7_xdZxkA-qjU7UdI' --output "/tmp/sat-500.png"
+test -s "/tmp/sat-500.png"
+          curl --fail --location --retry 3 --silent --show-error 'https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3-pro-image/images/500f54e8-714d-4f98-84a8-3fe22d8c6c1f/efb99ace-4567-4351-a159-78569aa8442d/photorealistic_premium_standalone_studio_product_photograph_.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiN2NkMDBiYzYzYmRjMTRmNSIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5Mzc2OTI4Nn0.QEM6TRl3f7TMo4vbQs3brBwGpFJGceBmD_h1HpTW118' --output "/tmp/sat-510.png"
+test -s "/tmp/sat-510.png"
+          curl --fail --location --retry 3 --silent --show-error 'https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3-pro-image/images/91ad61f2-5240-45e2-bdab-edc7872a5298/554f2825-3635-4db8-83ec-d506492df6f4/photorealistic_premium_standalone_studio_product_photograph_.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNDRiNWJmMDY3OGQ1YTQ3MCIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5Mzc2MzIwNn0.vqZDsOHuc6imjfeQ7dCdg7PK3oIFuFBekuNz1mQLLhI' --output "/tmp/sat-545.png"
+test -s "/tmp/sat-545.png"
+          curl --fail --location --retry 3 --silent --show-error 'https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3-pro-image/images/8e521468-a0c6-4d63-aac3-41cfb5fa2e73/03abde2c-3535-49f9-9869-4b5adf200b40/photorealistic_premium_standalone_studio_product_photograph_.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiZjFiM2IzMjM2MjA0OGFhZSIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MzczODY1OX0.XfsRbNk17mub-RsLeTFbBOz_asDD_PndGZ_TC0GwbUw' --output "/tmp/sat-550.png"
+test -s "/tmp/sat-550.png"
+      - name: Optimize images to webp
+        run: |
+          python -m pip install --quiet pillow
+          python - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          for p in sorted(Path('/tmp').glob('*.png')):
+              if p.stem not in ["hero","sat-150","sat-197","aluminum","factory","road","sat-500","sat-510","sat-545","sat-550"]:
+                  continue
+              image=Image.open(p).convert('RGB')
+              image.thumbnail((1920,1280),Image.Resampling.LANCZOS)
+              out=Path('assets')/(p.stem+'.webp')
+              image.save(out, 'WEBP', quality=83, method=6)
+              print(out, out.stat().st_size)
+          PY
+      - name: Permanently save generated images to GitHub
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/*.webp
+          git diff --cached --quiet || git commit -m "Add original ZUBR TRAIL image assets"
+          git push
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload site with images
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - name: Deploy ZUBR TRAIL
+        id: deployment
+        uses: actions/deploy-pages@v4
