@@ -92,7 +92,7 @@ jobs:
               await page.setViewportSize({width:390,height:844});
               await page.reload({waitUntil:'networkidle'});
               if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+6))throw Error(folder+' mobile overflow');
-              const menu=page.locator('#menuButton').or(page.locator('#mobileMenu'));
+              const menu=page.locator('#mobileMenu:visible, #menuButton:visible').first();
               await menu.click();
               if(!(await page.locator('#nav').evaluate(e=>e.classList.contains('open'))))throw Error(folder+' mobile menu failed');
               await page.screenshot({path:'concepts/previews/v2-'+folder+'-mobile.png',fullPage:false});
