@@ -1,0 +1,5 @@
+PASS spreadsheet 34 rows, 68 checkboxes and results
+PASS 3-choice limit, totals, actual GitHub ballot
+PASS search and filters
+PASS mobile screen, inner table scrolling, selection
+ALL SIMPLE POLL TESTS PASSED
