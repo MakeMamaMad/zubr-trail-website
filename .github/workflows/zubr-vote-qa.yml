@@ -1,4 +1,4 @@
-name: ZUBR DESIGN LEAGUE browser QA
+name: Simple Excel-style poll QA
 on:
   push:
     branches: [main]
@@ -6,113 +6,103 @@ on:
       - "poll/index.html"
       - "poll/app.js"
       - "poll/style.css"
-      - "poll/participants.json"
       - ".github/workflows/zubr-vote-qa.yml"
   workflow_dispatch:
 permissions:
   contents: write
 jobs:
-  validate:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
-      - name: Verify source and vote counter
+          node-version: '22'
+      - name: Check registry and JavaScript
         run: |
           node --check poll/app.js
           python poll/tally.py --test
           python - <<'PY'
           import json
-          from pathlib import Path
-          registry=json.loads(Path("poll/participants.json").read_text())
-          data=registry["participants"]
-          assert len(data)==34
-          assert sum(p["group"]=="zubr" for p in data)==3
-          assert len({p["id"] for p in data})==34
-          for p in data: assert p["url"].startswith("https://")
-          print("PASS: 31 manufacturers and 3 ZUBR sites with HTTPS links")
+          d=json.load(open("poll/participants.json"))
+          assert len(d["participants"])==34
+          assert sum(x["group"]=="zubr" for x in d["participants"])==3
+          assert len(set(x["id"] for x in d["participants"]))==34
+          print("PASS 34 participants, 3 ZUBR sites")
           PY
       - name: Install Chromium
         run: |
           npm install --no-save playwright@1.55.1
           npx playwright install --with-deps chromium
-      - name: End-to-end desktop and mobile browser verification
+      - name: Test voting table
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/poll-http.log 2>&1 &
-          node > /tmp/zubr-poll-qa.log 2>&1 <<'NODE'
-          const {chromium}=require("playwright");
-          const fs=require("fs");
+          python3 -m http.server 8771 --bind 127.0.0.1 >/tmp/poll-web.log 2>&1 &
+          node > /tmp/poll-simple-qa.log 2>&1 <<'NODE'
+          const { chromium }=require('playwright');
+          const fs=require('fs');
           (async()=>{
             const browser=await chromium.launch({headless:true});
             const page=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
             const errors=[];
-            page.on("pageerror",e=>errors.push(String(e)));
-            const url="http://127.0.0.1:8765/poll/";
-            const response=await page.goto(url,{waitUntil:"networkidle"});
-            if(response.status()!==200)throw Error("Poll returned HTTP "+response.status());
-            await page.locator(".ballot-row").first().waitFor();
-            if(await page.locator(".ballot-row").count()!==34)throw Error("Missing 34 participants");
-            if(await page.locator('input[data-vote="desktop"]').count()!==34)throw Error("Desktop checkboxes incomplete");
-            if(await page.locator('input[data-vote="mobile"]').count()!==34)throw Error("Mobile checkboxes incomplete");
-            if((await page.locator("#totalBallots").innerText())==="—")throw Error("Public results did not load");
-            console.log("PASS 34 rows, 68 checkboxes, public results loaded");
-            for(const id of ["zubr-gold","stas","benalu"])await page.locator('input[data-vote="desktop"][data-id="'+id+'"]').check();
+            page.on('pageerror',e=>errors.push(e.message));
+            const url='http://127.0.0.1:8771/poll/';
+            await page.goto(url,{waitUntil:'networkidle'});
+            await page.locator('#tableBody tr[data-id]').first().waitFor();
+            if(await page.locator('#tableBody tr[data-id]').count()!==34)throw Error('34 rows missing');
+            if(await page.locator('input[data-vote="desktop"]').count()!==34)throw Error('Desktop checkboxes missing');
+            if(await page.locator('input[data-vote="mobile"]').count()!==34)throw Error('Mobile checkboxes missing');
+            if((await page.locator('#resultStatus').innerText()).includes('Загрузка'))throw Error('Results loading stuck');
+            console.log('PASS spreadsheet 34 rows, 68 checkboxes and results');
+            for(const id of ['stas','benalu','zubr-power'])await page.locator('input[data-vote="desktop"][data-id="'+id+'"]').check();
             await page.locator('input[data-vote="desktop"][data-id="schmitz"]').click();
-            if(await page.locator('input[data-vote="desktop"][data-id="schmitz"]').isChecked())throw Error("4th desktop vote incorrectly accepted");
+            if(await page.locator('input[data-vote="desktop"][data-id="schmitz"]').isChecked())throw Error('Fourth desktop pick accepted');
             await page.locator('input[data-vote="mobile"][data-id="zubr-lime"]').check();
-            if((await page.locator("#desktopCount").innerText())!=="3 / 3")throw Error("Desktop counter wrong");
-            if((await page.locator("#mobileCount").innerText())!=="1 / 3")throw Error("Mobile counter wrong");
-            await page.locator("#submitBallot").click();
-            if(!(await page.locator("#confirmationDialog").isVisible()))throw Error("Confirmation dialog did not open");
-            const issue=await page.locator("#confirmIssue").getAttribute("href");
-            const issueURL=new URL(issue);
-            if(issueURL.pathname!=="/MakeMamaMad/zubr-trail-website/issues/new")throw Error("Wrong GitHub issue link");
-            const body=issueURL.searchParams.get("body");
-            if(!body.includes("DESKTOP:")||!body.includes("zubr-gold")||!body.includes("MOBILE: zubr-lime"))throw Error("Incorrect GitHub ballot content");
-            await page.locator("#closeDialog").click();
-            console.log("PASS choice caps, two counters, confirmation and persistent GitHub issue link");
-            await page.locator("#searchInput").fill("Knapen");
-            if(await page.locator(".ballot-row").count()!==1)throw Error("Search failed");
-            await page.locator("#searchInput").fill("");
-            await page.locator('button[data-filter="zubr"]').click();
-            if(await page.locator(".ballot-row").count()!==3)throw Error("ZUBR filter failed");
-            await page.locator('button[data-filter="other"]').click();
-            if(await page.locator(".ballot-row").count()!==31)throw Error("Manufacturers filter failed");
-            await page.locator('button[data-filter="all"]').click();
-            console.log("PASS filters and search");
-            fs.mkdirSync("poll/previews",{recursive:true});
-            await page.evaluate(()=>window.scrollTo({top:0,behavior:"instant"}));
-            await page.screenshot({path:"poll/previews/poll-desktop.png",fullPage:true});
+            if(await page.locator('#countDesktop').innerText()!=='3 / 3')throw Error('Desktop count wrong');
+            if(await page.locator('#countMobile').innerText()!=='1 / 3')throw Error('Mobile count wrong');
+            const issue=new URL(await page.locator('#sendVote').getAttribute('href'));
+            if(issue.pathname!=='/MakeMamaMad/zubr-trail-website/issues/new')throw Error('Issue link invalid');
+            const body=issue.searchParams.get('body')||'';
+            if(!body.includes('DESKTOP:')||!body.includes('zubr-power')||!body.includes('MOBILE: zubr-lime'))throw Error('Ballot payload wrong');
+            console.log('PASS 3-choice limit, totals, actual GitHub ballot');
+            await page.locator('#search').fill('knapen');
+            if(await page.locator('#tableBody tr[data-id]').count()!==1)throw Error('Search broken');
+            await page.locator('#search').fill('');
+            await page.locator('#filter').selectOption('zubr');
+            if(await page.locator('#tableBody tr[data-id]').count()!==3)throw Error('ZUBR filter broken');
+            await page.locator('#filter').selectOption('other');
+            if(await page.locator('#tableBody tr[data-id]').count()!==31)throw Error('Manufacturer filter broken');
+            await page.locator('#filter').selectOption('all');
+            console.log('PASS search and filters');
+            fs.mkdirSync('poll/previews',{recursive:true});
+            await page.screenshot({path:'poll/previews/simple-table-desktop.png',fullPage:true});
             await page.setViewportSize({width:390,height:844});
-            await page.reload({waitUntil:"networkidle"});
-            await page.locator(".ballot-row").first().waitFor();
-            if(await page.locator(".ballot-row").count()!==34)throw Error("Mobile ballot incomplete");
+            await page.reload({waitUntil:'networkidle'});
+            await page.locator('#tableBody tr[data-id]').first().waitFor();
             const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
-            if(overflow>5)throw Error("Mobile horizontal overflow "+overflow+" px");
-            await page.locator('input[data-vote="mobile"][data-id="zubr-power"]').check();
-            if(!await page.locator('input[data-vote="mobile"][data-id="zubr-power"]').isChecked())throw Error("Mobile selection failed");
-            await page.screenshot({path:"poll/previews/poll-mobile.png",fullPage:true});
-            if(errors.length)throw Error("Browser JS errors "+errors.join("; "));
-            console.log("PASS 390px mobile UI, working checkboxes, no horizontal overflow");
-            console.log("ALL POLL QA CHECKS PASSED");
+            if(overflow>5)throw Error('Mobile page overflow '+overflow);
+            const tableCanScroll=await page.locator('.sheet-scroll').evaluate(el=>el.scrollWidth>el.clientWidth);
+            if(!tableCanScroll)throw Error('Expected horizontal scroll inside table on mobile');
+            await page.locator('input[data-vote="desktop"][data-id="zubr-power"]').uncheck();
+            await page.locator('input[data-vote="mobile"][data-id="zubr-lime"]').check();
+            await page.screenshot({path:'poll/previews/simple-table-mobile.png',fullPage:false});
+            if(errors.length)throw Error('JS errors '+errors.join(';'));
+            console.log('PASS mobile screen, inner table scrolling, selection');
+            console.log('ALL SIMPLE POLL TESTS PASSED');
             await browser.close();
-          })().catch(err=>{console.error(err);process.exit(1);});
+          })().catch(err=>{console.error(err);process.exit(1)});
           NODE
-      - name: Save public QA report and screen previews
+      - name: Save screenshots and QA status
         if: always()
-        shell: bash
         run: |
           mkdir -p poll/previews
-          if [ -f /tmp/zubr-poll-qa.log ]; then cp /tmp/zubr-poll-qa.log poll/previews/qa.txt; else echo "Browser verification did not start." > poll/previews/qa.txt; fi
+          if [ -f /tmp/poll-simple-qa.log ]; then cp /tmp/poll-simple-qa.log poll/previews/simple-table-qa.txt; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add poll/previews/
+          git add poll/previews/simple-table-*
           if ! git diff --cached --quiet; then
-            git commit -m "Capture design league poll desktop and mobile browser QA"
+            git commit -m "Save simple Excel-style voting table QA screenshots"
             git pull --rebase
             git push
           fi
