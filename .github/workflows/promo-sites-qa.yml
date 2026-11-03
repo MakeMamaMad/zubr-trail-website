@@ -34,7 +34,7 @@ jobs:
           for page in ['promo/index.html','promo/sat-500/index.html','promo/sat-150/index.html']:
               path=Path(page); raw=path.read_text();p=Tags();p.feed(raw)
               assert '<!doctype html>' in raw.lower(),page
-              assert 'promo/assets' in raw or '../assets/promo.' in raw,page
+              assert 'promo.css?v=1' in raw and 'promo.js?v=1' in raw,page
               assert 'zubr-promo-destination' in raw,page
               assert 'entry-gate' in raw,page
               assert raw.count('<main')==1,page
