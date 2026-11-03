@@ -1,4 +1,4 @@
-/* ZUBR POWER / Motion Edition. Non-invasive enhancement of the original design. */
+/* ZUBR TRAIL / Motion Edition. Non-invasive enhancement of the original design. */
 :root{--power-motion-red:#ff2942;--power-motion-curve:cubic-bezier(.19,1,.22,1)}
 .power-progress{position:fixed;inset:0 0 auto 0;height:3px;z-index:220;pointer-events:none;background:transparent}
 .power-progress-bar{height:100%;width:100%;background:linear-gradient(90deg,#ff304b,#e70c2a,#ff7a68);box-shadow:0 0 15px #fa173d77;transform:scaleX(0);transform-origin:left center;will-change:transform}
@@ -122,7 +122,7 @@ html.power-leaving #main,html.power-leaving .header{opacity:1;transform:none;fil
  html.power-leaving #main,html.power-leaving .header{opacity:1!important;filter:none!important;transform:none!important}
 }
 
-/* v3: direct-link entrance with the existing ZUBR POWER transition. */
+/* v3: direct-link entrance with the existing ZUBR TRAIL transition. */
 html.power-entering[data-power-entry="direct"] .power-page-wipe__brand{animation:power-direct-logo .58s cubic-bezier(.18,.75,.27,1) both}
 @keyframes power-direct-logo{0%{opacity:0;transform:translate3d(0,19px,0) scale(.965)}100%{opacity:1;transform:translate3d(0,0,0) scale(1)}}
 html.power-entering[data-power-entry="direct"].power-arrived .power-page-wipe__brand{animation:none;opacity:0;transform:translateY(-9px)}

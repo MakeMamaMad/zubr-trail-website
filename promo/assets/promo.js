@@ -1,5 +1,5 @@
 
-/* ZUBR POWER / product promo experiences — dependency-free motion. */
+/* ZUBR TRAIL / product promo experiences — dependency-free motion. */
 (function(){
   'use strict';
   const doc=document.documentElement;

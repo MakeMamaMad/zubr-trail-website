@@ -42,6 +42,8 @@ jobs:
               assert 'assets/power-motion.css?v=3' in raw,name
               assert 'assets/power-motion.js?v=3' in raw,name
               assert 'class="power-page-wipe"' in raw,name
+              assert 'ZUBR <b>TRAIL</b>' in raw,name
+              assert 'ZUBR <b>POWER</b>' not in raw,name
               assert 'zubr-power-transition-path' in raw,name
           print("All nine original POWER routes and additive motion assets verified.")
           PY

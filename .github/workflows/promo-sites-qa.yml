@@ -37,6 +37,10 @@ jobs:
               assert ('promo.css?v=1' in raw or 'promo.css?v=2' in raw) and 'promo.js?v=1' in raw,page
               assert 'zubr-promo-destination' in raw,page
               assert 'entry-gate' in raw,page
+              assert 'ZUBR <em>TRAIL</em>' in raw,page
+              assert 'ZUBR POWER' not in raw,page
+              assert 'ZUBR <em>POWER</em>' not in raw,page
+              assert 'ZUBR <span>POWER</span>' not in raw,page
               assert raw.count('<main')==1,page
               assert len(p.links)>10,page
               assert all((path.parent/s).exists() for s in p.images if not s.startswith('http')),page
