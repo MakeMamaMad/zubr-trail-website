@@ -7,5 +7,5 @@ PASS: outgoing and incoming navigation wipe, cleanup complete
 PASS: all navbar links animate both the exit and entry
 PASS: preserved catalog filter, dark/light toggle
 PASS: all nine mobile pages, no horizontal overflow, mobile menu, navigation transition
-locator.evaluate: Target page, context or browser has been closed
-    at [stdin]:114:36
+PASS: reduced-motion accessibility
+ALL POWER MOTION QA CHECKS PASSED
