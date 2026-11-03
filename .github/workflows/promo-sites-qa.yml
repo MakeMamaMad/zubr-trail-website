@@ -1,0 +1,158 @@
+name: SAT-500 and SAT-150 Promo QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - "promo/**"
+      - ".github/workflows/promo-sites-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Static source verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check promo/assets/promo.js
+          python3 - <<'PY'
+          from pathlib import Path
+          from html.parser import HTMLParser
+          class Tags(HTMLParser):
+              def __init__(self): super().__init__(); self.tags=[];self.links=[];self.images=[]
+              def handle_starttag(self,tag,attrs):
+                  self.tags.append(tag)
+                  a=dict(attrs)
+                  if tag=='a' and a.get('href'): self.links.append(a['href'])
+                  if tag=='img':self.images.append(a.get('src',''))
+          for page in ['promo/index.html','promo/sat-500/index.html','promo/sat-150/index.html']:
+              path=Path(page); raw=path.read_text();p=Tags();p.feed(raw)
+              assert '<!doctype html>' in raw.lower(),page
+              assert 'promo/assets' in raw or '../assets/promo.' in raw,page
+              assert 'zubr-promo-destination' in raw,page
+              assert 'entry-gate' in raw,page
+              assert raw.count('<main')==1,page
+              assert len(p.links)>10,page
+              assert all((path.parent/s).exists() for s in p.images if not s.startswith('http')),page
+              print(page, len(p.tags),'tags',len(p.links),'links',len(p.images),'verified images')
+          PY
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.55.1
+          npx playwright install --with-deps chromium
+      - name: Run interactive desktop and mobile tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa/promo
+          python3 -m http.server 8178 --bind 127.0.0.1 > /tmp/promo-http.log 2>&1 &
+          node > /tmp/promo-qa.log 2>&1 <<'NODE'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
+            const base='http://127.0.0.1:8178/';
+            const errors=[];
+            page.on('pageerror',e=>errors.push(e.message));
+            async function visit(url){
+              const res=await page.goto(base+url,{waitUntil:'domcontentloaded'});
+              if(!res||res.status()!==200)throw Error('HTTP '+res?.status()+' for '+url);
+              if(await page.locator('html').getAttribute('data-entry-type')!=='direct')throw Error('Missing direct entry on '+url);
+              if(await page.locator('.entry-gate .entry-mark').count()!==1)throw Error('Missing brand splash on '+url);
+              await page.waitForFunction(()=>!document.documentElement.classList.contains('promo-entering'),null,{timeout:7000});
+              if(await page.locator('main').count()!==1)throw Error('Missing main for '+url);
+              if(await page.locator('h1').count()!==1)throw Error('Missing product headline '+url);
+              if(!(await page.locator('.hero img, .hub-card img').first().evaluate(el=>el.complete&&el.naturalWidth>0)))throw Error('Product image missing '+url);
+              if(errors.length)throw Error('JS page error '+url+': '+errors.join('; '));
+            }
+            for(const u of ['promo/index.html','promo/sat-500/index.html','promo/sat-150/index.html'])await visit(u);
+            console.log('PASS: all 3 independent URLs open directly with brand splash and verified images');
+            await visit('promo/sat-500/index.html');
+            if(await page.locator('h1').innerText().then(x=>!x.includes('РЕЙСА')))throw Error('SAT-500 hero incorrect');
+            if(await page.locator('.technical-list>div').count()!==6)throw Error('SAT-500 technical list missing');
+            await page.locator('[data-volume="55"]').click();
+            if(await page.locator('[data-volume-display]').innerText()!=='55')throw Error('Volume selector incorrect');
+            if(await page.locator('[data-volume="55"]').getAttribute('aria-pressed')!=='true')throw Error('Volume aria state incorrect');
+            await page.locator('[data-tab="unload"]').click();
+            if(await page.locator('[data-panel="unload"]').isHidden())throw Error('Unload engineering tab failed');
+            if(!await page.locator('[data-panel="body"]').isHidden())throw Error('Inactive tab still displayed');
+            await page.locator('[data-tab="body"]').click();
+            console.log('PASS: SAT-500 volume variants, engineering tabs, specs');
+            await page.screenshot({path:'qa/promo/sat-500-desktop.png',fullPage:true});
+            const reveal=page.locator('.benefit-card').first();
+            await reveal.scrollIntoViewIfNeeded();
+            await page.waitForFunction(()=>document.querySelector('.benefit-card')?.classList.contains('is-visible'));
+            await page.evaluate(()=>window.scrollTo(0,0));
+            await page.waitForFunction(()=>!document.querySelector('.benefit-card')?.classList.contains('is-visible'));
+            await reveal.scrollIntoViewIfNeeded();
+            await page.waitForFunction(()=>document.querySelector('.benefit-card')?.classList.contains('is-visible'));
+            console.log('PASS: on-scroll animations repeat when section returns to viewport');
+            await page.locator('a[href="../sat-150/index.html"]').first().click();
+            if(!await page.locator('html').evaluate(el=>el.classList.contains('promo-leaving')))throw Error('Cross-product outgoing transition did not start');
+            await page.waitForURL('**/promo/sat-150/index.html');
+            if(await page.locator('html').getAttribute('data-entry-type')!=='internal')throw Error('Incoming product transition not recognized');
+            await page.waitForFunction(()=>!document.documentElement.classList.contains('promo-entering'),null,{timeout:7000});
+            console.log('PASS: two-stage branded navigation SAT-500 -> SAT-150');
+            await page.locator('[data-floor-toggle]').click();
+            if(!await page.locator('.floor-sim').evaluate(el=>el.classList.contains('is-running')))throw Error('Floor diagram play failed');
+            await page.locator('[data-floor-toggle]').click();
+            if(await page.locator('.floor-sim').evaluate(el=>el.classList.contains('is-running')))throw Error('Floor diagram pause failed');
+            await page.locator('[data-cargo="pellets"]').click();
+            if(!((await page.locator('[data-cargo-description]').innerText()).includes('Пеллеты')))throw Error('Cargo selector failed');
+            await page.locator('[data-tab="body"]').click();
+            if(await page.locator('[data-panel="body"]').isHidden())throw Error('SAT-150 tab failed');
+            if(await page.locator('.technical-list>div').count()!==7)throw Error('SAT-150 specs missing');
+            await page.screenshot({path:'qa/promo/sat-150-desktop.png',fullPage:true});
+            console.log('PASS: SAT-150 moving floor play/pause, cargo selector, interactive tabs');
+            const all=['promo/index.html','promo/sat-500/index.html','promo/sat-150/index.html'];
+            for(const width of [768,390]){
+              await page.setViewportSize({width,height:844});
+              for(const u of all){
+                await visit(u);
+                const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+                if(overflow>5)throw Error('Horizontal overflow '+width+'px '+u+': '+overflow);
+                if(!(await page.locator('main').isVisible()))throw Error('Invisible main content on mobile '+u);
+              }
+              console.log('PASS: no horizontal overflow at '+width+'px across all 3 pages');
+            }
+            await visit('promo/sat-500/index.html');
+            await page.screenshot({path:'qa/promo/sat-500-mobile.png',fullPage:true});
+            await page.locator('.menu-toggle').click();
+            if(await page.locator('.menu-toggle').getAttribute('aria-expanded')!=='true')throw Error('Mobile menu not opened');
+            await page.locator('.main-nav a[href="#specs"]').click();
+            if(await page.locator('.menu-toggle').getAttribute('aria-expanded')!=='false')throw Error('Mobile menu not closed after link');
+            await visit('promo/sat-150/index.html');
+            await page.screenshot({path:'qa/promo/sat-150-mobile.png',fullPage:true});
+            console.log('PASS: mobile nav and deep section link');
+            const reduced=await browser.newPage({reducedMotion:'reduce',viewport:{width:1440,height:900}});
+            await reduced.goto(base+'promo/sat-150/index.html',{waitUntil:'domcontentloaded'});
+            if(await reduced.locator('html').evaluate(el=>el.classList.contains('promo-entering')))throw Error('Reduced motion did not disable splash');
+            const floorButton=reduced.locator('[data-floor-toggle]');
+            if(!await floorButton.isDisabled())throw Error('Reduced motion did not disable moving diagram');
+            await reduced.close();
+            console.log('PASS: reduced-motion accessibility');
+            if(errors.length)throw Error('Page errors '+errors.join('; '));
+            console.log('ALL SAT-500 / SAT-150 PROMO QA CHECKS PASSED');
+            await browser.close();
+          })().catch(err=>{console.error(err);process.exit(1)});
+          NODE
+      - name: Save visual QA and browser report
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p qa/promo
+          if test -f /tmp/promo-qa.log; then cp /tmp/promo-qa.log qa/promo/qa.txt; else echo "Promo browser QA not started" > qa/promo/qa.txt; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add qa/promo/
+          if ! git diff --cached --quiet; then
+            git commit -m "Capture SAT-500 and SAT-150 promo visual QA"
+            git pull --rebase
+            git push
+          fi
