@@ -3,8 +3,9 @@ PASS: all direct page URLs display and finish the branded ZUBR POWER intro
 PASS: reload also replays the branded intro
 PASS: animated hero, marquee, scroll progress, full model and technology content
 PASS: scroll entrance animation resets and replays on returning to visible section
-Error: Incoming wipe did not clear
-    at [stdin]:68:93
-    at runNextTicks (node:internal/process/task_queues:64:5)
-    at process.processImmediate (node:internal/timers:452:9)
-    at process.callbackTrampoline (node:internal/async_hooks:130:17)
+PASS: outgoing and incoming navigation wipe, cleanup complete
+PASS: all navbar links animate both the exit and entry
+PASS: preserved catalog filter, dark/light toggle
+PASS: all nine mobile pages, no horizontal overflow, mobile menu, navigation transition
+locator.evaluate: Target page, context or browser has been closed
+    at [stdin]:114:36
