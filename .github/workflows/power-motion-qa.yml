@@ -59,6 +59,7 @@ jobs:
             const browser=await chromium.launch({headless:true});
             const page=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
             const errors=[];
+            fs.mkdirSync('qa/power',{recursive:true});
             const all=['index.html','models.html','model.html?id=SAT-510','technology.html','production.html','test-drive.html?model=SAT-510','news.html','article.html?slug=aluminum','contacts.html'];
             page.on('pageerror',err=>errors.push(err.message));
             const base='http://127.0.0.1:8123/';
