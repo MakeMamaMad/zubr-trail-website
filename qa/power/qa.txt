@@ -1,0 +1,6 @@
+PASS: nine POWER pages, JS without runtime errors, progress bar
+PASS: animated hero, marquee, scroll progress, full model and technology content
+PASS: preserved catalog filter, dark/light toggle
+PASS: all nine mobile pages, no horizontal overflow, mobile menu, navigation transition
+PASS: reduced-motion accessibility
+ALL POWER MOTION QA CHECKS PASSED
