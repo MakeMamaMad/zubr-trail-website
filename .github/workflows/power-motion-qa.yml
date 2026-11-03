@@ -167,10 +167,10 @@ jobs:
             await reduced.goto(base+'index.html',{waitUntil:'networkidle'});
             if(await reduced.locator('.power-headline-line').count()!==0)throw Error('Reduced-motion adaptation broken');
             if(await reduced.locator('.power-ticker').count()!==1)throw Error('Reduced-motion content missing');
-            await reduced.close();
             if(await reduced.locator('html').evaluate(el=>el.classList.contains('power-entering'))){
               throw Error('Reduced-motion user must not see the branded splash');
             }
+            await reduced.close();
             console.log('PASS: reduced-motion accessibility');
             console.log('ALL POWER MOTION QA CHECKS PASSED');
             await browser.close();
