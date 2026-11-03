@@ -1,0 +1,135 @@
+name: ZUBR POWER Motion Edition QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - "assets/power-motion.css"
+      - "assets/power-motion.js"
+      - "index.html"
+      - "models.html"
+      - "model.html"
+      - "technology.html"
+      - "production.html"
+      - "test-drive.html"
+      - "news.html"
+      - "article.html"
+      - "contacts.html"
+      - ".github/workflows/power-motion-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Static safety checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check assets/site-v3.js
+          node --check assets/power-motion.js
+          python3 - <<'PY'
+          from pathlib import Path
+          pages=['index.html','models.html','model.html','technology.html','production.html','test-drive.html','news.html','article.html','contacts.html']
+          for name in pages:
+              raw=Path(name).read_text()
+              assert 'assets/site-v3.js?v=1' in raw,name
+              assert 'assets/site-v3.css?v=1' in raw,name
+              assert 'assets/power-motion.css?v=1' in raw,name
+              assert 'assets/power-motion.js?v=1' in raw,name
+          print("All nine original POWER routes and additive motion assets verified.")
+          PY
+      - name: Install headless Chromium
+        run: |
+          npm install --no-save playwright@1.55.1
+          npx playwright install --with-deps chromium
+      - name: Desktop and mobile motion E2E
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8123 --bind 127.0.0.1 > /tmp/power-http.log 2>&1 &
+          node > /tmp/power-motion-qa.log 2>&1 <<'NODE'
+          const {chromium}=require('playwright');
+          const fs=require('fs');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
+            const errors=[];
+            const all=['index.html','models.html','model.html?id=SAT-510','technology.html','production.html','test-drive.html?model=SAT-510','news.html','article.html?slug=aluminum','contacts.html'];
+            page.on('pageerror',err=>errors.push(err.message));
+            const base='http://127.0.0.1:8123/';
+            async function visit(path){
+              const res=await page.goto(base+path,{waitUntil:'networkidle'});
+              if(!res||res.status()!==200)throw Error('HTTP '+path+': '+res?.status());
+              if(await page.locator('#main').count()!==1)throw Error('Missing content '+path);
+              if(await page.locator('.power-progress-bar').count()!==1)throw Error('Missing scroll indicator '+path);
+              if(await page.locator('.header').count()!==1)throw Error('Header missing '+path);
+              if(errors.length)throw Error('JS error '+path+': '+errors.join('; '));
+            }
+            for(const path of all)await visit(path);
+            console.log('PASS: nine POWER pages, JS without runtime errors, progress bar');
+            await visit('index.html');
+            if(await page.locator('.power-ticker').count()!==1)throw Error('Marquee missing');
+            if(await page.locator('.power-headline-line').count()!==3)throw Error('Animated hero headline missing');
+            if(await page.locator('.model-card').count()!==3)throw Error('Original homepage product catalog changed');
+            if(await page.locator('.benefit').count()!==6)throw Error('Original tech benefits altered');
+            await page.screenshot({path:'qa/power/power-desktop.png',fullPage:false});
+            await page.screenshot({path:'qa/power/power-full.png',fullPage:true});
+            await page.evaluate(()=>window.scrollTo({top:800,behavior:'instant'}));
+            await page.waitForTimeout(180);
+            const progress=await page.locator('.power-progress-bar').evaluate(el=>getComputedStyle(el).transform);
+            if(progress==='none'||progress==='matrix(1, 0, 0, 1, 0, 0)')throw Error('Scroll progress inert');
+            if(!await page.locator('.header').evaluate(el=>el.classList.contains('power-scrolled')))throw Error('Header scroll state missing');
+            console.log('PASS: animated hero, marquee, scroll progress, full model and technology content');
+            await visit('models.html');
+            if(await page.locator('#catalogGrid .model-card').count()!==6)throw Error('Full catalog not six models');
+            await page.locator('.filter[data-filter="grain"]').click();
+            if(await page.locator('#catalogGrid .model-card:visible').count()!==2)throw Error('Filter broken by animation layer');
+            await page.locator('.filter[data-filter="all"]').click();
+            const old=await page.locator('html').getAttribute('data-theme');
+            await page.locator('#themeSwitch').click();
+            if(await page.locator('html').getAttribute('data-theme')===old)throw Error('Dark/light switch broken');
+            console.log('PASS: preserved catalog filter, dark/light toggle');
+            await visit('test-drive.html?model=SAT-510');
+            if(await page.locator('select[name="model"]').inputValue()!=='SAT-510')throw Error('Prefilled request model broken');
+            await page.setViewportSize({width:390,height:844});
+            for(const path of all){
+              await visit(path);
+              const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+              if(overflow>5)throw Error('Mobile horizontal overflow '+path+' '+overflow);
+            }
+            await visit('index.html');
+            await page.screenshot({path:'qa/power/power-mobile.png',fullPage:false});
+            await page.locator('#menuButton').click();
+            if(!(await page.locator('#mainNav').evaluate(el=>el.classList.contains('open'))))throw Error('Mobile menu broken');
+            await page.locator('#mainNav a[href="models.html"]').click();
+            await page.waitForURL('**/models.html');
+            console.log('PASS: all nine mobile pages, no horizontal overflow, mobile menu, navigation transition');
+            const reduced=await browser.newPage({viewport:{width:1440,height:900},reducedMotion:'reduce'});
+            await reduced.goto(base+'index.html',{waitUntil:'networkidle'});
+            if(await reduced.locator('.power-headline-line').count()!==0)throw Error('Reduced-motion adaptation broken');
+            if(await reduced.locator('.power-ticker').count()!==1)throw Error('Reduced-motion content missing');
+            await reduced.close();
+            console.log('PASS: reduced-motion accessibility');
+            console.log('ALL POWER MOTION QA CHECKS PASSED');
+            await browser.close();
+          })().catch(err=>{console.error(err);process.exit(1)});
+          NODE
+      - name: Commit screenshots and QA report
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p qa/power
+          if [ -f /tmp/power-motion-qa.log ]; then cp /tmp/power-motion-qa.log qa/power/qa.txt; else echo 'Power QA did not start' > qa/power/qa.txt; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add qa/power/
+          if ! git diff --cached --quiet; then
+            git commit -m "Capture ZUBR POWER motion visual and mobile QA"
+            git pull --rebase
+            git push
+          fi
