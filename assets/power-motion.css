@@ -121,3 +121,9 @@ html.power-leaving #main,html.power-leaving .header{opacity:1;transform:none;fil
  .power-page-wipe{display:none!important}
  html.power-leaving #main,html.power-leaving .header{opacity:1!important;filter:none!important;transform:none!important}
 }
+
+/* v3: direct-link entrance with the existing ZUBR POWER transition. */
+html.power-entering[data-power-entry="direct"] .power-page-wipe__brand{animation:power-direct-logo .58s cubic-bezier(.18,.75,.27,1) both}
+@keyframes power-direct-logo{0%{opacity:0;transform:translate3d(0,19px,0) scale(.965)}100%{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+html.power-entering[data-power-entry="direct"].power-arrived .power-page-wipe__brand{animation:none;opacity:0;transform:translateY(-9px)}
+@media(prefers-reduced-motion:reduce){html.power-entering[data-power-entry="direct"] .power-page-wipe__brand{animation:none!important}}

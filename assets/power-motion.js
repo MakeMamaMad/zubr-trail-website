@@ -139,13 +139,22 @@
     if(destinationTimer)clearTimeout(destinationTimer);
     destinationTimer=0;
   }
+  // A fresh link and an internal navigation share the same full-screen
+  // brand wipe. The direct entry holds the mark briefly; a navbar transition
+  // already displayed it on the outgoing document.
   if(!reduced&&html.classList.contains("power-entering")&&overlay){
-    try{sessionStorage.removeItem(transitionKey)}catch(e){}
-    html.dataset.powerNavigation="arrived";
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      html.classList.add("power-arrived");
-      destinationTimer=setTimeout(clearTransition,850);
-    }));
+    const fromNavigation=html.dataset.powerEntry==="navigation";
+    try{
+      if(sessionStorage.getItem(transitionKey)===location.pathname)sessionStorage.removeItem(transitionKey);
+    }catch(e){}
+    html.dataset.powerNavigation=fromNavigation?"arrived":"direct";
+    const revealDelay=fromNavigation?125:690;
+    destinationTimer=setTimeout(()=>{
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        html.classList.add("power-arrived");
+        destinationTimer=setTimeout(clearTransition,900);
+      }));
+    },revealDelay);
   }else{
     html.classList.remove("power-entering","power-arrived");
     try{
@@ -174,7 +183,8 @@
       html.classList.add("power-leaving");
       html.dataset.powerNavigation="leaving";
       try{sessionStorage.setItem(transitionKey,dest.pathname)}catch(e){}
-      destinationTimer=setTimeout(()=>location.assign(dest.href),570);
+      // Cover both layers fully before loading the destination document.
+      destinationTimer=setTimeout(()=>location.assign(dest.href),660);
     });
   }
 
