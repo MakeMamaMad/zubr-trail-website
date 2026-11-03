@@ -121,7 +121,10 @@ jobs:
             await page.waitForURL('**/models.html');
             await page.locator('html[data-power-navigation="arrived"]').waitFor({state:'attached',timeout:3000});
             if(await page.locator('.power-page-wipe__layer').count()!==2)throw Error('Incoming wipe layers missing');
-            await page.waitForTimeout(930);
+            await page.waitForFunction(
+              ()=>!document.documentElement.classList.contains('power-entering'),
+              null,{timeout:5500}
+            );
             if(await page.locator('html').evaluate(el=>el.classList.contains('power-entering')))throw Error('Incoming wipe did not clear');
             console.log('PASS: outgoing and incoming navigation wipe, cleanup complete');
             // Confirm that repeated navbar navigation has the same transition.
