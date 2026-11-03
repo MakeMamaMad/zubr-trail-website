@@ -77,12 +77,17 @@
   if(!reduced&&"IntersectionObserver" in window){
     const observed=$$(revealSelectors.join(","));
     // Scope hiding to animated browsers. On unsupported browsers all content remains visible.
+    // Repeat every time an element returns into view. Reset only after it has
+    // completely left the viewport so small scroll movements do not flicker.
     const observer=new IntersectionObserver(entries=>{
-      for(const e of entries)if(e.isIntersecting){
-        e.target.classList.add("power-in");
-        observer.unobserve(e.target);
+      for(const entry of entries){
+        if(entry.isIntersecting && entry.intersectionRatio >= .035){
+          entry.target.classList.add("power-in");
+        }else if(!entry.isIntersecting){
+          entry.target.classList.remove("power-in");
+        }
       }
-    },{threshold:.08,rootMargin:"0px 0px -22px 0px"});
+    },{threshold:[0,.035,.12],rootMargin:"0px 0px -30px 0px"});
     observed.forEach(element=>{
       const siblings=$$(element.tagName.toLowerCase(),element.parentElement);
       const idx=Math.max(0,siblings.indexOf(element));
@@ -92,20 +97,94 @@
     });
   }
 
-  // Preserve navigation behavior, external links, forms, deep links and accessibility.
-  if(!reduced){
+  // Re-run the hero headline and entrance details whenever the first screen
+  // comes back into view, including after the browser restores a cached page.
+  function restartHero(){
+    if(!hero||reduced)return;
+    const items=$$(".power-headline-inner, .hero .eyebrow, .hero-inner>p, .hero-actions, .hero-facts",hero);
+    items.forEach(el=>el.style.setProperty("animation","none"));
+    void hero.offsetWidth;
+    items.forEach(el=>el.style.removeProperty("animation"));
+  }
+  if(hero&&!reduced&&"IntersectionObserver" in window){
+    let seen=false,visible=false;
+    const heroObserver=new IntersectionObserver(entries=>{
+      for(const entry of entries){
+        if(entry.isIntersecting&&!visible){
+          if(seen)restartHero();
+          seen=true;visible=true;
+        }else if(!entry.isIntersecting){
+          visible=false;
+        }
+      }
+    },{threshold:0,rootMargin:"0px 0px -12% 0px"});
+    heroObserver.observe(hero);
+  }
+
+  // Real two-stage cross-document page wipe:
+  // 1. The exiting page is covered, then the browser navigates.
+  // 2. A session marker lets the next document reveal itself through the same
+  //    brand-colour wipe. The marker is consumed once to avoid reload loops.
+  const transitionKey="zubr-power-transition-path";
+  const html=document.documentElement;
+  const overlay=$(".power-page-wipe");
+  const powerPages=new Set([
+    "index.html","models.html","model.html","technology.html","production.html",
+    "test-drive.html","news.html","article.html","contacts.html"
+  ]);
+  const powerBase=new URL("index.html",location.href).pathname.replace(/index\.html$/,"");
+  let destinationTimer=0;
+  function clearTransition(){
+    html.classList.remove("power-leaving","power-entering","power-arrived");
+    if(destinationTimer)clearTimeout(destinationTimer);
+    destinationTimer=0;
+  }
+  if(!reduced&&html.classList.contains("power-entering")&&overlay){
+    try{sessionStorage.removeItem(transitionKey)}catch(e){}
+    html.dataset.powerNavigation="arrived";
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      html.classList.add("power-arrived");
+      destinationTimer=setTimeout(clearTransition,850);
+    }));
+  }else{
+    html.classList.remove("power-entering","power-arrived");
+    try{
+      if(sessionStorage.getItem(transitionKey)===location.pathname)sessionStorage.removeItem(transitionKey);
+    }catch(e){}
+  }
+
+  if(!reduced&&overlay){
     document.addEventListener("click",event=>{
-      if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+      if(event.defaultPrevented||event.button!==0||
+         event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
       const link=event.target.closest("a[href]");
-      if(!link||link.hasAttribute("download")||link.target==="_blank")return;
+      if(!link||link.hasAttribute("download")||
+         link.getAttribute("target")&&link.getAttribute("target")!=="_self")return;
       let dest;try{dest=new URL(link.href,location.href)}catch(e){return}
       if(!["https:","http:"].includes(dest.protocol)||dest.origin!==location.origin)return;
-      if(dest.href===location.href)return;
-      if(dest.pathname===location.pathname&&dest.search===location.search)return;
+      if(!dest.pathname.startsWith(powerBase))return;
+      const filename=dest.pathname.substring(powerBase.length);
+      if(!powerPages.has(filename))return;
+      if(dest.pathname===location.pathname&&dest.search===location.search&&dest.hash)return;
+      // Do not hijack same-page anchor navigation, downloads or modifier clicks.
       event.preventDefault();
-      if(document.documentElement.classList.contains("power-leaving"))return;
-      document.documentElement.classList.add("power-leaving");
-      setTimeout(()=>location.assign(dest.href),235);
+      if(html.classList.contains("power-leaving"))return;
+      if(destinationTimer)clearTimeout(destinationTimer);
+      html.classList.remove("power-entering","power-arrived");
+      html.classList.add("power-leaving");
+      html.dataset.powerNavigation="leaving";
+      try{sessionStorage.setItem(transitionKey,dest.pathname)}catch(e){}
+      destinationTimer=setTimeout(()=>location.assign(dest.href),570);
     });
   }
+
+  // bfcache: a document restored by Back/Forward must not remain covered by
+  // its outgoing page animation; the hero and section reveals remain reusable.
+  addEventListener("pageshow",event=>{
+    if(!event.persisted)return;
+    clearTransition();
+    try{sessionStorage.removeItem(transitionKey)}catch(e){}
+    restartHero();
+    requestPaint();
+  });
 })();

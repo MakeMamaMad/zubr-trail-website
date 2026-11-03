@@ -99,3 +99,25 @@
  .power-leaving #main{opacity:1;transform:none;filter:none}
  .btn,.model-card,.news-card,.tech-photo img,.production-image img,.scenic-img img{transition:none!important}
 }
+
+
+/* v2: matched branded page transitions, including the arriving document. */
+.power-page-wipe{position:fixed;inset:0;overflow:hidden;display:grid;place-items:center;z-index:9999;pointer-events:none;visibility:hidden;isolation:isolate}
+.power-page-wipe__layer{position:absolute;inset:0;transform:translate3d(-105%,0,0);will-change:transform}
+.power-page-wipe__layer--red{z-index:0;background:linear-gradient(110deg,#ba061f 0%,#ee1535 48%,#fe455a 100%);transition:transform .56s cubic-bezier(.77,0,.22,1)}
+.power-page-wipe__layer--dark{z-index:1;background:linear-gradient(108deg,#11151b,#070a10 73%);transition:transform .56s cubic-bezier(.77,0,.22,1) .08s}
+.power-page-wipe__brand{position:relative;z-index:2;color:#f8f9fd;white-space:nowrap;font:italic 900 clamp(44px,8vw,115px)/1 'Roboto Condensed',Arial,sans-serif;letter-spacing:-.045em;opacity:0;transform:translateY(16px);transition:opacity .23s ease,transform .3s ease;text-shadow:0 7px 24px #0006}
+.power-page-wipe__brand b{color:var(--power-motion-red);font-weight:900}
+html.power-leaving .power-page-wipe,html.power-entering .power-page-wipe{visibility:visible}
+html.power-leaving .power-page-wipe__layer{transform:translate3d(0,0,0)}
+html.power-leaving .power-page-wipe__brand{opacity:1;transform:translateY(0);transition-delay:.28s}
+html.power-entering .power-page-wipe__layer{transform:translate3d(0,0,0);transition:none}
+html.power-entering .power-page-wipe__brand{opacity:1;transform:translateY(0);transition:none}
+html.power-entering.power-arrived .power-page-wipe__layer--dark{transform:translate3d(105%,0,0);transition:transform .67s cubic-bezier(.76,0,.24,1)}
+html.power-entering.power-arrived .power-page-wipe__layer--red{transform:translate3d(105%,0,0);transition:transform .73s cubic-bezier(.76,0,.24,1) .07s}
+html.power-entering.power-arrived .power-page-wipe__brand{opacity:0;transform:translateY(-9px);transition:opacity .23s ease .2s,transform .23s ease .2s}
+html.power-leaving #main,html.power-leaving .header{opacity:1;transform:none;filter:none;transition:none}
+@media(prefers-reduced-motion:reduce){
+ .power-page-wipe{display:none!important}
+ html.power-leaving #main,html.power-leaving .header{opacity:1!important;filter:none!important;transform:none!important}
+}
