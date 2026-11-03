@@ -1,1 +1,10 @@
-Power QA did not start
+PASS: nine POWER pages, JS without runtime errors, progress bar
+PASS: all direct page URLs display and finish the branded ZUBR POWER intro
+PASS: reload also replays the branded intro
+PASS: animated hero, marquee, scroll progress, full model and technology content
+PASS: scroll entrance animation resets and replays on returning to visible section
+Error: Incoming wipe did not clear
+    at [stdin]:68:93
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at process.processImmediate (node:internal/timers:452:9)
+    at process.callbackTrampoline (node:internal/async_hooks:130:17)
