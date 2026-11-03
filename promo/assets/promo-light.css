@@ -1,0 +1,160 @@
+/* ZUBR TRAIL / light theme for SAT-500 and SAT-150 promo pages.
+   Loaded after promo.css; everything is scoped to body.promo-light so the
+   promo hub (promo/index.html) keeps its dark look.
+   Idea: daylight aluminium ground, graphite type, trailer-red accent.
+   Product renders are dark studio shots, so they are kept as framed
+   "plates" with a chamfered corner (a nod to aluminium profile cuts). */
+
+body.promo-light,body.promo-light[data-product]{
+  --paper:#eef1f3;      /* cool aluminium ground */
+  --plate:#ffffff;      /* raised surfaces */
+  --mist:#e2e7eb;       /* alternate sections */
+  --ink:#15212b;        /* graphite text */
+  --ink-soft:#56636d;   /* secondary text, 5.4:1 on paper */
+  --line:#c9d1d7;
+  --accent:#cf2a1c;     /* trailer red, white text 5.25:1 */
+  --accent-deep:#a81f15;
+  --accent-ink:#ffffff;
+  --electric:#cf2a1c;
+  --dark:var(--paper);--surface:var(--plate);--panel:var(--plate);
+  background:var(--paper);color:var(--ink);color-scheme:light
+}
+.promo-light:before{opacity:1;background-image:linear-gradient(#15212b0a 1px,transparent 1px),linear-gradient(90deg,#15212b0a 1px,transparent 1px);mask-image:linear-gradient(180deg,#000 0,transparent 60%)}
+.promo-light ::selection{background:var(--accent);color:#fff}
+
+/* Header */
+.promo-light .brand strong{color:var(--ink)}
+.promo-light .brand small{border-left-color:#15212b40}
+.promo-light .topbar.scrolled{background:#f6f8f9eb;border-color:var(--line);box-shadow:0 10px 30px #15212b14}
+.promo-light .menu-toggle{color:var(--ink);border-color:var(--line);background:var(--plate)}
+.promo-light .progress>i{box-shadow:none}
+
+/* Buttons */
+.promo-light .btn:hover{box-shadow:0 12px 28px #cf2a1c38}
+.promo-light .btn-outline{background:transparent;color:var(--ink)!important;border-color:#15212b59;backdrop-filter:none}
+.promo-light .btn-outline:hover{background:var(--plate);border-color:var(--accent);box-shadow:0 12px 28px #15212b1a}
+.promo-light .btn-outline:before{background:linear-gradient(100deg,transparent 22%,#cf2a1c14 50%,transparent 76%)}
+
+/* Hero: headline on daylight ground, the render as a framed plate on the right */
+.promo-light .hero{background:linear-gradient(180deg,#f7f9fa 0%,var(--paper) 100%)}
+.promo-light .hero-media{inset:104px 0 190px 47%;width:auto;height:auto;clip-path:polygon(56px 0,100% 0,100% 100%,0 100%,0 56px);background:#0d1214}
+.promo-light .hero-media img{object-position:50% 52%;filter:none}
+.promo-light .hero-media:before{background:linear-gradient(0deg,#0b0f1266 0%,transparent 30%)}
+.promo-light .hero-media:after{opacity:0}
+.promo-light .hero-ghost{left:1vw;right:auto;top:84px;z-index:-1;color:transparent;-webkit-text-stroke:1.5px #15212b1f;mix-blend-mode:normal;font-size:clamp(200px,27vw,440px)}
+.promo-light .hero-content{width:min(1440px,calc(100% - 112px))}
+.promo-light .hero h1{font-size:clamp(56px,6.6vw,112px);max-width:calc(47vw - 84px)}
+.promo-light .hero-lead{color:var(--ink-soft);max-width:min(480px,40vw)}
+.promo-light .hero-actions{max-width:calc(47vw - 84px)}
+.promo-light .hero-footer{border-top-color:#15212b33}
+.promo-light .hero-footer small{color:var(--ink-soft)}
+.promo-light .hero-down{color:var(--ink)}
+.promo-light .hero-down i{border-color:#15212b59}
+
+/* Running strip stays the one loud red band */
+.promo-light .strip{border-top:0;border-bottom:0;color:#fff}
+.promo-light .strip-track b{opacity:.6}
+
+/* Section grounds alternate paper / plate / mist */
+.promo-light .intro{background:var(--plate)}
+.promo-light .intro-main>p{color:var(--ink-soft)}
+.promo-light .editorial-photo,.promo-light .detail-photo{border:0;background:#0d1214;clip-path:polygon(40px 0,100% 0,100% 100%,0 100%,0 40px)}
+.promo-light .editorial-photo span{color:#fff;background:#0d1214b3}
+
+.promo-light .metrics{background:var(--paper);color:var(--ink);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.promo-light .metrics article{border-right-color:var(--line)}
+.promo-light .metrics strong{color:var(--accent)}
+.promo-light .metrics p{color:var(--ink-soft);opacity:1}
+
+.promo-light .chapter-section{background:var(--paper)}
+.promo-light .tab{color:var(--ink)}
+.promo-light .tab[aria-selected=true]{color:var(--accent)}
+.promo-light .tab-panel .tab-img{border:0;filter:none;clip-path:polygon(32px 0,100% 0,100% 100%,0 100%,0 32px)}
+
+.promo-light .interactive{background:var(--plate)}
+.promo-light .interactive:before{background:radial-gradient(ellipse at 75% 40%,#cf2a1c0d,transparent 55%)}
+.promo-light .volume-option{background:var(--plate);color:var(--ink);border-color:var(--line)}
+.promo-light .volume-option:hover{border-color:var(--accent)}
+.promo-light .volume-option[aria-pressed=true]{color:#fff}
+.promo-light .volume-showcase{border:0;background:#0d1214;clip-path:polygon(40px 0,100% 0,100% 100%,0 100%,0 40px)}
+.promo-light .volume-showcase:before{z-index:1;pointer-events:none;background:linear-gradient(0deg,#0b0f12a6 0%,transparent 45%)}
+.promo-light .volume-showcase img{inset:0;width:100%;height:100%;object-fit:cover;filter:none}
+.promo-light .volume-big{z-index:2;color:#fff;mix-blend-mode:normal;opacity:1}
+.promo-light .volume-caption{z-index:2;color:#fff}
+
+/* SAT-150 moving-floor diagram, redrawn as a light technical drawing */
+.promo-light .floor-sim{border:1px solid var(--line);background:linear-gradient(160deg,#f8fafb,#e3e8ec)}
+.promo-light .floor-sim:before{background-image:linear-gradient(#15212b0d 1px,transparent 1px),linear-gradient(90deg,#15212b0d 1px,transparent 1px)}
+.promo-light .floor-rails{background:repeating-linear-gradient(90deg,#4a5660 0 11px,#cf2a1c 12px 15px,#3d4851 16px 29px);border-color:#b9c2c8;box-shadow:0 18px 26px #15212b2e,inset 0 8px 12px #0006}
+.promo-light .floor-cargo{filter:drop-shadow(0 10px 8px #15212b40)}
+.promo-light .floor-cargo i{background:linear-gradient(130deg,#c9a184,#7d5f4e);box-shadow:inset 4px 7px #fff3}
+.promo-light .floor-arrow{box-shadow:none}
+.promo-light .floor-label{color:var(--accent-deep)}
+.promo-light .cargo-chip{border-color:var(--line);color:var(--ink);background:var(--plate)}
+.promo-light .cargo-chip:hover{border-color:var(--accent)}
+.promo-light .cargo-chip[aria-pressed=true]{color:#fff}
+
+.promo-light .benefits{background:var(--paper)}
+.promo-light .benefit-card{background:var(--plate);border-color:var(--line)}
+.promo-light .benefit-card:hover{background:var(--plate);border-color:var(--accent);box-shadow:0 18px 40px #15212b14}
+
+/* Full-bleed render becomes an inset plate between light sections */
+.promo-light .spec-art{width:min(1440px,calc(100% - 112px));margin:0 auto clamp(70px,8vw,130px);min-height:600px;clip-path:polygon(64px 0,100% 0,100% 100%,0 100%,0 64px);background:#0d1214}
+.promo-light .spec-art:after{background:linear-gradient(0deg,#0b0f12e6 0%,transparent 45%),linear-gradient(90deg,#0b0f12a6,transparent 65%)}
+.promo-light .spec-art-text h2{color:#fff}
+.promo-light .spec-art-text p{color:#e6eaec}
+.promo-light .spec-art-text .eyebrow{color:#ff8a78}
+
+.promo-light .detail-section{background:var(--plate)}
+.promo-light .detail-photo-label{color:#fff}
+.promo-light .technical-list dd{color:var(--ink)}
+
+.promo-light .gallery{background:var(--plate);padding:0 0 clamp(70px,8vw,130px)}
+.promo-light .gallery-grid{width:min(1440px,calc(100% - 112px));margin-inline:auto;gap:14px}
+.promo-light .gallery-item{background:#0d1214}
+.promo-light .gallery-item:first-child{clip-path:polygon(48px 0,100% 0,100% 100%,0 100%,0 48px)}
+.promo-light .gallery-item span{color:#fff;background:#0d1214b3}
+
+.promo-light .cta-section{background:var(--mist)}
+.promo-light .cta-section:before{border-color:#cf2a1c59;box-shadow:0 0 0 60px #15212b06,0 0 0 170px #15212b04}
+.promo-light .cta-grid p{color:var(--ink-soft)}
+
+.promo-light .footer{background:var(--paper);border-top-color:var(--line)}
+.promo-light .footer-bottom{color:var(--ink-soft)}
+
+/* Entry gate: daylight panel with a red wedge, away from the wordmark */
+.promo-light .entry-gate{background:var(--paper)}
+.promo-light .entry-gate:before{background:linear-gradient(135deg,#f7f9fa 0%,var(--paper) 66%,var(--accent) 66.2%,var(--accent-deep) 100%)}
+.promo-light .entry-gate:after{background:linear-gradient(120deg,transparent 0%,#ffffff80 40%,transparent 75%)}
+.promo-light .entry-mark{color:var(--ink);text-shadow:none}
+.promo-light .entry-mark em{color:var(--accent)}
+.promo-light .entry-type{color:var(--ink-soft)}
+.promo-light .entry-line{background:var(--accent)}
+
+@media(max-width:1100px){
+  .promo-light .spec-art,.promo-light .gallery-grid{width:calc(100% - 64px)}
+  .promo-light .hero-media{left:50%;bottom:230px}
+  .promo-light .hero-content{width:calc(100% - 64px)}
+  .promo-light .hero-actions{max-width:calc(50vw - 60px)}
+  .promo-light .hero h1{font-size:clamp(52px,6.4vw,80px);max-width:calc(50vw - 60px)}
+}
+@media(max-width:760px){
+  .promo-light .main-nav{background:#f8fafbf7;box-shadow:0 22px 30px #15212b1f}
+  .promo-light .hero{align-items:flex-start;min-height:0}
+  .promo-light .hero-media{inset:89px 0 auto 20px;height:min(46svh,380px);clip-path:polygon(36px 0,100% 0,100% 100%,0 100%,0 36px)}
+  .promo-light .hero-content{padding-top:calc(89px + min(46svh,380px) + 34px)}
+  .promo-light .hero-content{width:calc(100% - 40px)}
+  .promo-light .hero-ghost{display:none}
+  .promo-light .hero h1{font-size:clamp(50px,12vw,92px);max-width:none}
+  .promo-light .hero-lead{max-width:520px}
+  .promo-light .hero-actions{max-width:none}
+  .promo-light .spec-art,.promo-light .gallery-grid{width:calc(100% - 40px)}
+  .promo-light .spec-art{min-height:485px;clip-path:polygon(36px 0,100% 0,100% 100%,0 100%,0 36px)}
+  .promo-light .metrics article:last-child{border-top-color:var(--line)}
+}
+@media(max-width:480px){
+  .promo-light .spec-art,.promo-light .gallery-grid{width:calc(100% - 32px)}
+  .promo-light .hero-content{width:calc(100% - 32px)}
+  .promo-light .hero-media{left:16px}
+  .promo-light .hero h1{font-size:clamp(44px,12.4vw,64px)}
+}
