@@ -1,10 +1,1 @@
-PASS: all 3 independent URLs open directly with brand splash and verified images
-PASS: SAT-500 volume variants, engineering tabs, specs
-PASS: on-scroll animations repeat when section returns to viewport
-PASS: two-stage branded navigation SAT-500 -> SAT-150
-PASS: SAT-150 moving floor play/pause, cargo selector, interactive tabs
-PASS: no horizontal overflow at 768px across all 3 pages
-PASS: no horizontal overflow at 390px across all 3 pages
-PASS: mobile nav and deep section link
-PASS: reduced-motion accessibility
-ALL SAT-500 / SAT-150 PROMO QA CHECKS PASSED
+Promo browser QA not started
