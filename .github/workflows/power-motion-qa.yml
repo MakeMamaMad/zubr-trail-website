@@ -39,8 +39,8 @@ jobs:
               raw=Path(name).read_text()
               assert 'assets/site-v3.js?v=1' in raw,name
               assert 'assets/site-v3.css?v=1' in raw,name
-              assert 'assets/power-motion.css?v=2' in raw,name
-              assert 'assets/power-motion.js?v=2' in raw,name
+              assert 'assets/power-motion.css?v=3' in raw,name
+              assert 'assets/power-motion.js?v=3' in raw,name
               assert 'class="power-page-wipe"' in raw,name
               assert 'zubr-power-transition-path' in raw,name
           print("All nine original POWER routes and additive motion assets verified.")
@@ -72,9 +72,25 @@ jobs:
               if(await page.locator('.power-progress-bar').count()!==1)throw Error('Missing scroll indicator '+path);
               if(await page.locator('.header').count()!==1)throw Error('Header missing '+path);
               if(errors.length)throw Error('JS error '+path+': '+errors.join('; '));
+              // Every stand-alone page URL must display the branded entrance.
+              if(await page.locator('html').getAttribute('data-power-entry')!=='direct'){
+                throw Error('Direct-link splash missing on '+path);
+              }
+              if(await page.locator('.power-page-wipe__brand').count()!==1){
+                throw Error('Brand mark missing on '+path);
+              }
+              await page.waitForFunction(
+                ()=>!document.documentElement.classList.contains('power-entering'),
+                null,{timeout:5500}
+              );
             }
             for(const path of all)await visit(path);
             console.log('PASS: nine POWER pages, JS without runtime errors, progress bar');
+            console.log('PASS: all direct page URLs display and finish the branded ZUBR POWER intro');
+            await page.reload({waitUntil:'domcontentloaded'});
+            if(await page.locator('html').getAttribute('data-power-entry')!=='direct')throw Error('Refresh did not show branded intro');
+            await page.waitForFunction(()=>!document.documentElement.classList.contains('power-entering'),null,{timeout:5500});
+            console.log('PASS: reload also replays the branded intro');
             await visit('index.html');
             if(await page.locator('.power-ticker').count()!==1)throw Error('Marquee missing');
             if(await page.locator('.power-headline-line').count()!==3)throw Error('Animated hero headline missing');
@@ -108,6 +124,18 @@ jobs:
             await page.waitForTimeout(930);
             if(await page.locator('html').evaluate(el=>el.classList.contains('power-entering')))throw Error('Incoming wipe did not clear');
             console.log('PASS: outgoing and incoming navigation wipe, cleanup complete');
+            // Confirm that repeated navbar navigation has the same transition.
+            for(const target of ['technology.html','test-drive.html','news.html','contacts.html','index.html']){
+              await page.locator('#mainNav a[href="'+target+'"]').click();
+              const exiting=await page.evaluate(()=>document.documentElement.classList.contains('power-leaving'));
+              if(!exiting)throw Error('Nav click did not trigger branded exit: '+target);
+              await page.waitForURL('**/'+target);
+              if(await page.locator('html').getAttribute('data-power-entry')!=='navigation'){
+                throw Error('Nav destination did not recognize the incoming wipe: '+target);
+              }
+              await page.waitForFunction(()=>!document.documentElement.classList.contains('power-entering'),null,{timeout:5500});
+            }
+            console.log('PASS: all navbar links animate both the exit and entry');
             await visit('models.html');
             if(await page.locator('#catalogGrid .model-card').count()!==6)throw Error('Full catalog not six models');
             await page.locator('.filter[data-filter="grain"]').click();
@@ -137,6 +165,9 @@ jobs:
             if(await reduced.locator('.power-headline-line').count()!==0)throw Error('Reduced-motion adaptation broken');
             if(await reduced.locator('.power-ticker').count()!==1)throw Error('Reduced-motion content missing');
             await reduced.close();
+            if(await reduced.locator('html').evaluate(el=>el.classList.contains('power-entering'))){
+              throw Error('Reduced-motion user must not see the branded splash');
+            }
             console.log('PASS: reduced-motion accessibility');
             console.log('ALL POWER MOTION QA CHECKS PASSED');
             await browser.close();
