@@ -39,8 +39,10 @@ jobs:
               raw=Path(name).read_text()
               assert 'assets/site-v3.js?v=1' in raw,name
               assert 'assets/site-v3.css?v=1' in raw,name
-              assert 'assets/power-motion.css?v=1' in raw,name
-              assert 'assets/power-motion.js?v=1' in raw,name
+              assert 'assets/power-motion.css?v=2' in raw,name
+              assert 'assets/power-motion.js?v=2' in raw,name
+              assert 'class="power-page-wipe"' in raw,name
+              assert 'zubr-power-transition-path' in raw,name
           print("All nine original POWER routes and additive motion assets verified.")
           PY
       - name: Install headless Chromium
@@ -86,6 +88,26 @@ jobs:
             if(progress==='none'||progress==='matrix(1, 0, 0, 1, 0, 0)')throw Error('Scroll progress inert');
             if(!await page.locator('.header').evaluate(el=>el.classList.contains('power-scrolled')))throw Error('Header scroll state missing');
             console.log('PASS: animated hero, marquee, scroll progress, full model and technology content');
+            // A model card must re-animate each time it enters the viewport, not only once.
+            const repeatCard=page.locator('.model-card').first();
+            await repeatCard.scrollIntoViewIfNeeded();
+            await page.waitForFunction(()=>document.querySelector('.model-card')?.classList.contains('power-in'));
+            await page.evaluate(()=>scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'}));
+            await page.waitForFunction(()=>!document.querySelector('.model-card')?.classList.contains('power-in'));
+            await repeatCard.scrollIntoViewIfNeeded();
+            await page.waitForFunction(()=>document.querySelector('.model-card')?.classList.contains('power-in'));
+            console.log('PASS: scroll entrance animation resets and replays on returning to visible section');
+            // Go through an actual menu link and verify both halves of the
+            // transition: cover outgoing page, uncover incoming page.
+            await page.evaluate(()=>document.querySelector('.nav a[href="models.html"]').click());
+            const leaving=await page.evaluate(()=>document.documentElement.classList.contains('power-leaving'));
+            if(!leaving)throw Error('Outgoing branded page wipe did not start');
+            await page.waitForURL('**/models.html');
+            await page.locator('html[data-power-navigation="arrived"]').waitFor({state:'attached',timeout:3000});
+            if(await page.locator('.power-page-wipe__layer').count()!==2)throw Error('Incoming wipe layers missing');
+            await page.waitForTimeout(930);
+            if(await page.locator('html').evaluate(el=>el.classList.contains('power-entering')))throw Error('Incoming wipe did not clear');
+            console.log('PASS: outgoing and incoming navigation wipe, cleanup complete');
             await visit('models.html');
             if(await page.locator('#catalogGrid .model-card').count()!==6)throw Error('Full catalog not six models');
             await page.locator('.filter[data-filter="grain"]').click();
