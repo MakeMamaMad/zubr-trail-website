@@ -25,6 +25,8 @@ jobs:
       - name: Install render dependencies
         run: |
           python -m pip install --disable-pip-version-check Pillow==11.3.0
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
           ffmpeg -version | head -2
       - name: Render 20.000 second movie without altering product geometry
         run: python promo/zubr_20s_exact.py
