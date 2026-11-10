@@ -1,0 +1,45 @@
+name: Download private review of generated ZUBR Grok clips
+
+on:
+  push:
+    branches:
+      - feature/zubr-grok-mp4-20s-production-20261110
+    paths:
+      - .github/workflows/prepare-zubr-grok-clips.yml
+
+permissions:
+  contents: read
+
+jobs:
+  retrieve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download the two temporary Grok MP4 outputs
+        shell: bash
+        env:
+          SOURCE_500: 'https://vidgen.x.ai/xai-vidgen-bucket/xai-video-5a8af2cf-9fe1-9a64-b4b9-433e185c6432.mp4'
+          SOURCE_545: 'https://vidgen.x.ai/xai-vidgen-bucket/xai-video-587ba2ac-63f3-9743-ad87-c7dd32938bee.mp4'
+        run: |
+          set -euo pipefail
+          mkdir -p zubr-review
+          curl -fLsS --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 140 "$SOURCE_500" -o zubr-review/SAT-500_Grok_raw.mp4
+          curl -fLsS --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 140 "$SOURCE_545" -o zubr-review/SAT-545_Grok_raw.mp4
+          for video in zubr-review/*Grok_raw.mp4; do
+            test "$(stat -c%s "$video")" -gt 100000
+            ffprobe -hide_banner -v error -show_entries format=duration,size -show_entries stream=width,height,r_frame_rate -of json "$video"
+          done
+          ffmpeg -hide_banner -loglevel error -y -ss 1 -i zubr-review/SAT-500_Grok_raw.mp4 -frames:v 1 zubr-review/SAT-500_at_1s.png
+          ffmpeg -hide_banner -loglevel error -y -ss 4 -i zubr-review/SAT-500_Grok_raw.mp4 -frames:v 1 zubr-review/SAT-500_at_4s.png
+          ffmpeg -hide_banner -loglevel error -y -ss 7 -i zubr-review/SAT-500_Grok_raw.mp4 -frames:v 1 zubr-review/SAT-500_at_7s.png
+          ffmpeg -hide_banner -loglevel error -y -ss 1 -i zubr-review/SAT-545_Grok_raw.mp4 -frames:v 1 zubr-review/SAT-545_at_1s.png
+          ffmpeg -hide_banner -loglevel error -y -ss 4 -i zubr-review/SAT-545_Grok_raw.mp4 -frames:v 1 zubr-review/SAT-545_at_4s.png
+          ffmpeg -hide_banner -loglevel error -y -ss 7 -i zubr-review/SAT-545_Grok_raw.mp4 -frames:v 1 zubr-review/SAT-545_at_7s.png
+      - name: Upload Grok video source clips and QC still frames
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZUBR-GROK-raw-2clips-16seconds
+          path: zubr-review/
+          retention-days: 7
+          if-no-files-found: error
