@@ -23,7 +23,7 @@ jobs:
       - name: Download the two temporary Grok MP4 outputs
         shell: bash
         env:
-          SOURCE_500: 'https://vidgen.x.ai/xai-vidgen-bucket/xai-video-5a8af2cf-9fe1-9a64-b4b9-433e185c6432.mp4'
+          SOURCE_500: 'https://vidgen.x.ai/xai-vidgen-bucket/xai-video-21084bad-f228-9696-9a82-67d221692848.mp4'
           SOURCE_545: 'https://vidgen.x.ai/xai-vidgen-bucket/xai-video-587ba2ac-63f3-9743-ad87-c7dd32938bee.mp4'
         run: |
           set -euo pipefail
