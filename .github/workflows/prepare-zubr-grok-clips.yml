@@ -24,7 +24,7 @@ jobs:
         shell: bash
         env:
           SOURCE_500: 'https://vidgen.x.ai/xai-vidgen-bucket/xai-video-21084bad-f228-9696-9a82-67d221692848.mp4'
-          SOURCE_545: 'https://vidgen.x.ai/xai-vidgen-bucket/xai-video-587ba2ac-63f3-9743-ad87-c7dd32938bee.mp4'
+          SOURCE_545: 'https://vidgen.x.ai/xai-vidgen-bucket/xai-video-0714dd25-1fb4-9139-89e4-20bdb5347633.mp4'
         run: |
           set -euo pipefail
           mkdir -p zubr-review
