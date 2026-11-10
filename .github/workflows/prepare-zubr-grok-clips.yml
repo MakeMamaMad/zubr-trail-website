@@ -28,6 +28,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p zubr-review
+          cp assets/sat-500.webp zubr-review/SAT-500_original.webp
+          cp assets/sat-545.webp zubr-review/SAT-545_original.webp
           curl -fLsS --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 140 "$SOURCE_500" -o zubr-review/SAT-500_Grok_raw.mp4
           curl -fLsS --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 140 "$SOURCE_545" -o zubr-review/SAT-545_Grok_raw.mp4
           for video in zubr-review/*Grok_raw.mp4; do
