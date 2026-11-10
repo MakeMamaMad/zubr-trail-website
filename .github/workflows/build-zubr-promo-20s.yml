@@ -1,0 +1,44 @@
+name: ZUBR TRAIL 20s exact-assets video
+
+on:
+  push:
+    branches:
+      - feature/zubr-20s-exact-assets-20261110
+    paths:
+      - promo/zubr_20s_exact.py
+      - .github/workflows/build-zubr-promo-20s.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    name: Render original-asset promo
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install render dependencies
+        run: |
+          python -m pip install --disable-pip-version-check Pillow==11.3.0
+          ffmpeg -version | head -2
+      - name: Render 20.000 second movie without altering product geometry
+        run: python promo/zubr_20s_exact.py
+      - name: Verify duration and sources
+        run: |
+          ffprobe -v error -count_frames -select_streams v:0 -show_entries stream=nb_frames,avg_frame_rate,width,height -show_entries format=duration -of json promo/output/ZUBR_TRAIL_SAT-500_SAT-545_20s.mp4
+          cat promo/output/source_and_QA.json
+      - name: Upload MP4, provenance manifest and QC frames
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZUBR-TRAIL-20s-SAT500-SAT545-exact-assets
+          path: |
+            promo/output/ZUBR_TRAIL_SAT-500_SAT-545_20s.mp4
+            promo/output/source_and_QA.json
+            promo/output/proof_*.png
+          retention-days: 90
+          if-no-files-found: error
