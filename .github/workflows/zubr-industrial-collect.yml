@@ -1,0 +1,67 @@
+name: ZUBR industrial film collect Grok sources
+on:
+  push:
+    branches:
+      - feature/zubr-industrial-film-20261111
+    paths:
+      - .github/workflows/zubr-industrial-collect.yml
+
+permissions:
+  contents: read
+
+jobs:
+  import_clips:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Retrieve 8 original Grok MP4 video jobs and QC frames
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p zubr-film-clips
+          cp assets/sat-500.webp zubr-film-clips/ORIGINAL_SAT-500.webp
+          cp assets/sat-545.webp zubr-film-clips/ORIGINAL_SAT-545.webp
+          curl -fLsS --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 120 'https://vidgen.x.ai/xai-vidgen-bucket/xai-video-f85a4295-0fa6-9522-a35e-5a4d4a707b42.mp4' -o zubr-film-clips/S01_500_elevator.mp4
+          test "$(stat -c%s zubr-film-clips/S01_500_elevator.mp4)" -gt 100000
+          ffprobe -v error -show_entries format=duration,size -of json zubr-film-clips/S01_500_elevator.mp4
+          for s in 1 3 5 7; do ffmpeg -v error -y -ss "$s" -i zubr-film-clips/S01_500_elevator.mp4 -frames:v 1 -vf "scale=640:-2" zubr-film-clips/S01_500_elevator_at_${s}s.jpg; done
+          curl -fLsS --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 120 'https://vidgen.x.ai/xai-vidgen-bucket/xai-video-2855a6d2-26b4-93f7-81bf-0d6c640878cf.mp4' -o zubr-film-clips/S02_500_grain_loading.mp4
+          test "$(stat -c%s zubr-film-clips/S02_500_grain_loading.mp4)" -gt 100000
+          ffprobe -v error -show_entries format=duration,size -of json zubr-film-clips/S02_500_grain_loading.mp4
+          for s in 1 3 5 7; do ffmpeg -v error -y -ss "$s" -i zubr-film-clips/S02_500_grain_loading.mp4 -frames:v 1 -vf "scale=640:-2" zubr-film-clips/S02_500_grain_loading_at_${s}s.jpg; done
+          curl -fLsS --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 120 'https://vidgen.x.ai/xai-vidgen-bucket/xai-video-39237585-e2a8-93ce-a7ea-f0dd92929a7e.mp4' -o zubr-film-clips/S03_545_quarry_loading.mp4
+          test "$(stat -c%s zubr-film-clips/S03_545_quarry_loading.mp4)" -gt 100000
+          ffprobe -v error -show_entries format=duration,size -of json zubr-film-clips/S03_545_quarry_loading.mp4
+          for s in 1 3 5 7; do ffmpeg -v error -y -ss "$s" -i zubr-film-clips/S03_545_quarry_loading.mp4 -frames:v 1 -vf "scale=640:-2" zubr-film-clips/S03_545_quarry_loading_at_${s}s.jpg; done
+          curl -fLsS --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 120 'https://vidgen.x.ai/xai-vidgen-bucket/xai-video-32b5062a-49af-9159-b1b4-24b3008256aa.mp4' -o zubr-film-clips/S04_545_quarry_discharge.mp4
+          test "$(stat -c%s zubr-film-clips/S04_545_quarry_discharge.mp4)" -gt 100000
+          ffprobe -v error -show_entries format=duration,size -of json zubr-film-clips/S04_545_quarry_discharge.mp4
+          for s in 1 3 5 7; do ffmpeg -v error -y -ss "$s" -i zubr-film-clips/S04_545_quarry_discharge.mp4 -frames:v 1 -vf "scale=640:-2" zubr-film-clips/S04_545_quarry_discharge_at_${s}s.jpg; done
+          curl -fLsS --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 120 'https://vidgen.x.ai/xai-vidgen-bucket/xai-video-92e40257-d3d5-95dd-b90e-4fde82634c3f.mp4' -o zubr-film-clips/S05_500_highway.mp4
+          test "$(stat -c%s zubr-film-clips/S05_500_highway.mp4)" -gt 100000
+          ffprobe -v error -show_entries format=duration,size -of json zubr-film-clips/S05_500_highway.mp4
+          for s in 1 3 5 7; do ffmpeg -v error -y -ss "$s" -i zubr-film-clips/S05_500_highway.mp4 -frames:v 1 -vf "scale=640:-2" zubr-film-clips/S05_500_highway_at_${s}s.jpg; done
+          curl -fLsS --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 120 'https://vidgen.x.ai/xai-vidgen-bucket/xai-video-95cdfa25-6134-9c34-9278-0da0d970b973.mp4' -o zubr-film-clips/S06_545_highway.mp4
+          test "$(stat -c%s zubr-film-clips/S06_545_highway.mp4)" -gt 100000
+          ffprobe -v error -show_entries format=duration,size -of json zubr-film-clips/S06_545_highway.mp4
+          for s in 1 3 5 7; do ffmpeg -v error -y -ss "$s" -i zubr-film-clips/S06_545_highway.mp4 -frames:v 1 -vf "scale=640:-2" zubr-film-clips/S06_545_highway_at_${s}s.jpg; done
+          curl -fLsS --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 120 'https://vidgen.x.ai/xai-vidgen-bucket/xai-video-45b53517-e5c8-9ce1-8975-7fc5d538d420.mp4' -o zubr-film-clips/S07_500_grain_discharge.mp4
+          test "$(stat -c%s zubr-film-clips/S07_500_grain_discharge.mp4)" -gt 100000
+          ffprobe -v error -show_entries format=duration,size -of json zubr-film-clips/S07_500_grain_discharge.mp4
+          for s in 1 3 5 7; do ffmpeg -v error -y -ss "$s" -i zubr-film-clips/S07_500_grain_discharge.mp4 -frames:v 1 -vf "scale=640:-2" zubr-film-clips/S07_500_grain_discharge_at_${s}s.jpg; done
+          curl -fLsS --retry 2 --retry-delay 2 --connect-timeout 20 --max-time 120 'https://vidgen.x.ai/xai-vidgen-bucket/xai-video-5be1f0b7-701e-91b0-8e55-744f6748f313.mp4' -o zubr-film-clips/S08_545_hero_highview.mp4
+          test "$(stat -c%s zubr-film-clips/S08_545_hero_highview.mp4)" -gt 100000
+          ffprobe -v error -show_entries format=duration,size -of json zubr-film-clips/S08_545_hero_highview.mp4
+          for s in 1 3 5 7; do ffmpeg -v error -y -ss "$s" -i zubr-film-clips/S08_545_hero_highview.mp4 -frames:v 1 -vf "scale=640:-2" zubr-film-clips/S08_545_hero_highview_at_${s}s.jpg; done
+      - name: Upload original source clips and frame QA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZUBR-INDUSTRIAL-8-GROK-CLIPS
+          path: zubr-film-clips/
+          if-no-files-found: error
+          retention-days: 7
