@@ -1,0 +1,31 @@
+name: ZUBR tipper unloading full model QC
+on:
+  push:
+    branches: [feature/zubr-industrial-film-20261111]
+    paths: [.github/workflows/zubr-industrial-unload-retry.yml]
+permissions:
+  contents: read
+jobs:
+  retrieve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install media inspection tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Download and check full model retake
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p retake
+          curl -fLsS --retry 2 --connect-timeout 20 --max-time 120 'https://vidgen.x.ai/xai-vidgen-bucket/xai-video-e04ca4e9-9dad-9a35-8d0b-2c2cce2e75cf.mp4' -o retake/S04_545_fullmodel_unload.mp4
+          ffprobe -v error -show_entries stream=width,height,r_frame_rate -show_entries format=duration,size -of json retake/S04_545_fullmodel_unload.mp4
+          for t in 1 2 3 4 5 6; do ffmpeg -v error -y -ss "$t" -i retake/S04_545_fullmodel_unload.mp4 -frames:v 1 retake/S04_545_fullmodel_at_${t}s.jpg; done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ZUBR-545-FULL-MODEL-UNLOAD-RETAKE
+          path: retake/
+          retention-days: 7
+          if-no-files-found: error
