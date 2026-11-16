@@ -1,0 +1,46 @@
+name: SAT-150 Grok functional promo preview (manual owner review)
+
+on:
+  push:
+    branches:
+      - experiment/sat150-grok-functional-demo-20261116
+    paths:
+      - "experiments/sat150-functional-demo/**"
+      - ".github/workflows/sat150-grok-demo.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "experiments/sat150-functional-demo/**"
+      - ".github/workflows/sat150-grok-demo.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install video tools and Russian voice library
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y ffmpeg fonts-dejavu-core espeak-ng
+          python -m pip install --disable-pip-version-check edge-tts==7.0.0 gTTS==2.5.4
+      - name: Download 3 Grok clips and render Russian narrated 9:16 demo
+        run: python experiments/sat150-functional-demo/assemble.py
+      - name: Verify video contains audio and frames
+        run: |
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height,duration -of default=noprint_wrappers=1 sat150-demo-output/ZUBR_TRAIL_SAT150_Grok_Product_Demo_9x16.mp4
+          ffprobe -v error -select_streams a:0 -show_entries stream=codec_name,duration -of default=noprint_wrappers=1 sat150-demo-output/ZUBR_TRAIL_SAT150_Grok_Product_Demo_9x16.mp4
+      - name: Upload private review package (not published)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zubr-trail-sat150-grok-review
+          path: sat150-demo-output/
+          retention-days: 7
