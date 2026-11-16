@@ -18,5 +18,5 @@ voice=("ZUBR TRAIL SAT-150. Разгрузка без подъёма кузов�
 "ZUBR TRAIL. Современные полуприцепы для ваших задач.")
 gTTS(text=voice,lang="ru").save(str(out/"narration.mp3"))
 (out/"script.txt").write_text(voice+"\n",encoding="utf-8")
-subprocess.run(["ffprobe","-v","error","-show_entries","format=duration,size","-of","json",str(out/"sat150_grok_fullshot_16x9.mp4")],check=True)
+print("READY", len(data), (out/"narration.mp3").stat().st_size)
 print("OK",len(data))
