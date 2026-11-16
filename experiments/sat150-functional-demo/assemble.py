@@ -43,9 +43,31 @@ def ffprobe(path: Path, selector: str) -> float:
     return float(raw)
 
 async def create_voice(path: Path) -> None:
-    import edge_tts
-    comm = edge_tts.Communicate(VOICE_TEXT, voice="ru-RU-SvetlanaNeural",rate="+10%")
-    await comm.save(str(path))
+    try:
+        import edge_tts
+        comm = edge_tts.Communicate(VOICE_TEXT, voice="ru-RU-SvetlanaNeural", rate="+10%")
+        await comm.save(str(path))
+        if path.exists() and path.stat().st_size > 2000:
+            print("VOICE_BACKEND=edge-tts", flush=True)
+            return
+    except Exception as exc:
+        print("Edge TTS unavailable:", str(exc)[:240], flush=True)
+    try:
+        from gtts import gTTS
+        import asyncio
+        await asyncio.to_thread(gTTS(text=VOICE_TEXT, lang="ru", slow=False).save, str(path))
+        if path.exists() and path.stat().st_size > 2000:
+            print("VOICE_BACKEND=gtts", flush=True)
+            return
+    except Exception as exc:
+        print("Google TTS unavailable:", str(exc)[:240], flush=True)
+    # Offline fallback: genuine Russian voice, although less natural.
+    wav = path.with_suffix(".wav")
+    run("espeak-ng", "-v", "ru", "-s", "140", "-w", str(wav), VOICE_TEXT)
+    run("ffmpeg", "-y", "-i", str(wav), "-ar", "44100", "-q:a", "3", str(path))
+    if not path.exists() or path.stat().st_size < 2000:
+        raise RuntimeError("No Russian narration could be generated")
+    print("VOICE_BACKEND=espeak-ng", flush=True)
 
 def main() -> None:
     clips = []
