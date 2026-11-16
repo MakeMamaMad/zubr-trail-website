@@ -29,8 +29,8 @@ jobs:
       - name: Install video tools and Russian voice library
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y ffmpeg fonts-dejavu-core
-          python -m pip install --disable-pip-version-check edge-tts==7.0.0
+          sudo apt-get install -y ffmpeg fonts-dejavu-core espeak-ng
+          python -m pip install --disable-pip-version-check edge-tts==7.0.0 gTTS==2.5.4
       - name: Download 3 Grok clips and render Russian narrated 9:16 demo
         run: python experiments/sat150-functional-demo/assemble.py
       - name: Verify video contains audio and frames
