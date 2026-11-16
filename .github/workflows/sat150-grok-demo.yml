@@ -7,6 +7,11 @@ on:
     paths:
       - "experiments/sat150-functional-demo/**"
       - ".github/workflows/sat150-grok-demo.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "experiments/sat150-functional-demo/**"
+      - ".github/workflows/sat150-grok-demo.yml"
   workflow_dispatch:
 
 permissions:
