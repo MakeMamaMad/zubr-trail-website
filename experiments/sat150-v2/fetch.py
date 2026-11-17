@@ -19,3 +19,12 @@ gTTS(text=voice,lang="ru").save(str(out/"narration.mp3"))
 (out/"script.txt").write_text(voice+"\n",encoding="utf-8")
 print("READY", len(data), (out/"narration.mp3").stat().st_size)
 print("OK",len(data))
+
+# Public Mixkit licensed royalty-free music for owner review; no publication
+for name,link in [('techno-fest-vibes.mp3','https://assets.mixkit.co/music/124/124.mp3'),('cat-walk.mp3','https://assets.mixkit.co/music/371/371.mp3')]:
+    req=urllib.request.Request(link,headers={'User-Agent':'Mozilla/5.0'})
+    try:
+        with urllib.request.urlopen(req,timeout=40) as resp: audio=resp.read()
+        if len(audio)>50000: (out/name).write_bytes(audio)
+        print('MUSIC',name,len(audio))
+    except Exception as ex: print('MUSIC_FAILED',name,str(ex))
