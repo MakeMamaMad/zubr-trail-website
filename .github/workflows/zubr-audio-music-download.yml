@@ -1,0 +1,26 @@
+name: Stage licensed Mixkit soundtrack for SAT150 review
+on:
+  push:
+    branches: [experiment/sat150-v2-storyboard-only-20261116]
+    paths:
+      - ".github/workflows/zubr-audio-music-download.yml"
+permissions:
+  contents: read
+jobs:
+  music:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Fetch Mixkit licensed commercial background track
+        run: |
+          set -e
+          mkdir -p music
+          curl --fail --location --retry 2 --connect-timeout 15 'https://assets.mixkit.co/music/124/124.mp3' --output music/techno-fest-vibes.mp3
+          curl --fail --location --retry 2 --connect-timeout 15 'https://assets.mixkit.co/music/371/371.mp3' --output music/cat-walk.mp3
+          curl --fail --location --retry 2 --connect-timeout 15 'https://assets.mixkit.co/active_storage/sfx/1492/1492-preview.mp3' --output music/transition-whoosh.mp3
+          ls -lh music
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sat150-licensed-music
+          path: music/
+          retention-days: 7
